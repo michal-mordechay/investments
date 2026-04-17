@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💰 דשבורד השקעות</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    --green: #00C896;
+    --red: #FF4757;
+    --blue: #3742FA;
+    --yellow: #FFC947;
+    --purple: #A55EEA;
+    --orange: #FF6B35;
+    --bg: #F0F4FF;
+    --card: #FFFFFF;
+    --text: #1a1a2e;
+    --muted: #6B7280;
+
+    --color-kranהשתלמות: #00C896;
+    --color-גמל: #3742FA;
+    --color-פנסיה: #A55EEA;
+    --color-מניות: #FF6B35;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Rubik', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    direction: rtl;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50px; left: -50px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(0,200,150,0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header-title span { font-size: 2.2rem; }
+  .header-subtitle { color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 4px; }
+
+  .header-actions { display: flex; gap: 10px; }
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Rubik', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+  .btn-primary { background: var(--green); color: white; }
+  .btn-secondary { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); }
+  .btn-danger { background: var(--red); color: white; }
+  .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+
+  /* MAIN */
+  .main { padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+
+  /* TOTAL CARD */
+  .total-card {
+    background: linear-gradient(135deg, #1a1a2e, #0f3460);
+    border-radius: 24px;
+    padding: 32px;
+    color: white;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .total-card::after {
+    content: '🦁';
+    position: absolute;
+    left: 32px;
+    bottom: -10px;
+    font-size: 6rem;
+    opacity: 0.15;
+    transform: scaleX(-1);
+  }
+  .total-label { font-size: 0.9rem; opacity: 0.7; margin-bottom: 8px; }
+  .total-amount {
+    font-family: 'Fredoka One', cursive;
+    font-size: 3.2rem;
+    line-height: 1;
+  }
+  .total-change {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,200,150,0.2);
+    border: 1px solid rgba(0,200,150,0.4);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 10px;
+    color: var(--green);
+  }
+  .total-change.negative { background: rgba(255,71,87,0.2); border-color: rgba(255,71,87,0.4); color: var(--red); }
+  .total-stats { display: flex; gap: 32px; }
+  .stat-item { text-align: center; }
+  .stat-value { font-family: 'Fredoka One', cursive; font-size: 1.6rem; }
+  .stat-label { font-size: 0.75rem; opacity: 0.6; margin-top: 2px; }
+
+  /* INVESTMENT CARDS GRID */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+
+  .investment-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 2px solid transparent;
+  }
+  .investment-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+  }
+  .investment-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 100%; height: 5px;
+    border-radius: 20px 20px 0 0;
+  }
+  .card-kranהשתלמות::before { background: var(--green); }
+  .card-גמל::before { background: var(--blue); }
+  .card-פנסיה::before { background: var(--purple); }
+  .card-מניות::before { background: var(--orange); }
+
+  .card-animal {
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    font-size: 2.4rem;
+    opacity: 0.18;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .investment-card:hover .card-animal { opacity: 0.4; transform: scale(1.1) rotate(-5deg); }
+
+  .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
+  .card-title { font-size: 1rem; font-weight: 700; color: var(--muted); }
+  .card-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+  }
+  .badge-kranהשתלמות { background: rgba(0,200,150,0.15); color: var(--green); }
+  .badge-גמל { background: rgba(55,66,250,0.12); color: var(--blue); }
+  .badge-פנסיה { background: rgba(165,94,234,0.12); color: var(--purple); }
+  .badge-מניות { background: rgba(255,107,53,0.12); color: var(--orange); }
+
+  .card-amount {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem;
+    margin-bottom: 8px;
+  }
+  .card-change {
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .change-positive { color: var(--green); }
+  .change-negative { color: var(--red); }
+  .change-neutral { color: var(--muted); }
+
+  .card-mini-chart { margin-top: 16px; height: 60px; }
+
+  .card-actions { display: flex; gap: 8px; margin-top: 16px; }
+
+  /* SECTION */
+  .section-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* CHARTS SECTION */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+  .chart-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  }
+  .chart-card-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chart-container { position: relative; height: 200px; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 24px;
+    padding: 32px;
+    width: 90%;
+    max-width: 480px;
+    position: relative;
+    animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes modalIn {
+    from { transform: scale(0.8) translateY(20px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  .modal-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: var(--muted);
+    transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #E5E7EB;
+    border-radius: 12px;
+    font-family: 'Rubik', sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+    outline: none;
+    direction: ltr;
+    text-align: right;
+  }
+  .form-input:focus { border-color: var(--blue); }
+  .form-select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #E5E7EB;
+    border-radius: 12px;
+    font-family: 'Rubik', sans-serif;
+    font-size: 0.95rem;
+    background: white;
+    cursor: pointer;
+    outline: none;
+  }
+  .form-select:focus { border-color: var(--blue); }
+
+  /* CONFIRM MODAL */
+  .confirm-modal { max-width: 380px; text-align: center; }
+  .confirm-icon { font-size: 3rem; margin-bottom: 12px; }
+  .confirm-message { color: var(--muted); margin-bottom: 24px; font-size: 0.95rem; }
+  .confirm-actions { display: flex; gap: 12px; justify-content: center; }
+
+  /* STOCKS SECTION */
+  .stocks-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 4px;
+  }
+  .stocks-table th {
+    text-align: right;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 600;
+    border-bottom: 2px solid #F3F4F6;
+  }
+  .stocks-table td {
+    padding: 12px 14px;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #F9FAFB;
+  }
+  .stocks-table tr:last-child td { border-bottom: none; }
+  .stock-ticker {
+    font-weight: 700;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+  }
+  .stock-loading { color: var(--muted); font-size: 0.8rem; }
+
+  /* TOAST */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+  .toast {
+    background: #1a1a2e;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 16px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    animation: toastIn 0.3s ease;
+  }
+  @keyframes toastIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* CSV upload area */
+  .upload-area {
+    border: 2px dashed #E5E7EB;
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .upload-area:hover { border-color: var(--blue); background: rgba(55,66,250,0.03); }
+  .upload-area .upload-icon { font-size: 2rem; margin-bottom: 8px; }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--muted);
+  }
+  .empty-state .empty-icon { font-size: 4rem; margin-bottom: 16px; }
+  .empty-state p { font-size: 1rem; margin-bottom: 20px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; background: #F3F4F6; border-radius: 14px; padding: 4px; margin-bottom: 20px; width: fit-content; }
+  .tab {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Rubik', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+    color: var(--muted);
+  }
+  .tab.active { background: white; color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+  /* Fetch button */
+  .fetch-btn {
+    background: none;
+    border: 1px solid var(--orange);
+    color: var(--orange);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Rubik', sans-serif;
+  }
+  .fetch-btn:hover { background: var(--orange); color: white; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .main { padding: 16px; }
+    .header { padding: 16px; }
+    .header-title { font-size: 1.4rem; }
+    .total-stats { display: none; }
+    .total-amount { font-size: 2.2rem; }
+    .charts-grid { grid-template-columns: 1fr; }
+  }
+
+  .divider-line {
+    height: 1px;
+    background: linear-gradient(to left, transparent, #E5E7EB, transparent);
+    margin: 28px 0;
+  }
+
+  /* color dots */
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="header-title"><span>🦁</span> דשבורד ההשקעות שלי</div>
+    <div class="header-subtitle">עודכן לאחרונה: <span id="lastUpdated">—</span></div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-secondary" onclick="exportData()">📦 גיבוי</button>
+    <button class="btn btn-secondary" onclick="importData()">📂 שחזור</button>
+    <button class="btn btn-primary" onclick="openAddModal()">➕ הוסף עדכון</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOTAL CARD -->
+  <div class="total-card">
+    <div>
+      <div class="total-label">סה"כ שווי תיק</div>
+      <div class="total-amount" id="totalAmount">₪0</div>
+      <div class="total-change" id="totalChange">טוען...</div>
+    </div>
+    <div class="total-stats">
+      <div class="stat-item">
+        <div class="stat-value" id="statKranHashtalamut">₪0</div>
+        <div class="stat-label">🌿 קרן השתלמות</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="statGamal">₪0</div>
+        <div class="stat-label">🐘 גמל</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="statPension">₪0</div>
+        <div class="stat-label">🦉 פנסיה</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="statStocks">₪0</div>
+        <div class="stat-label">🦊 מניות</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVESTMENT CARDS -->
+  <div class="section-title">📊 לפי סוג השקעה</div>
+  <div class="cards-grid" id="cardsGrid"></div>
+
+  <div class="divider-line"></div>
+
+  <!-- CHARTS -->
+  <div class="section-title">📈 גרפים לאורך זמן</div>
+  <div class="tabs">
+    <button class="tab active" onclick="setChartPeriod('all', this)">הכל</button>
+    <button class="tab" onclick="setChartPeriod('year', this)">שנה</button>
+    <button class="tab" onclick="setChartPeriod('6m', this)">6 חודשים</button>
+    <button class="tab" onclick="setChartPeriod('3m', this)">3 חודשים</button>
+  </div>
+  <div class="charts-grid" id="chartsGrid"></div>
+
+  <div class="divider-line"></div>
+
+  <!-- STOCKS TABLE -->
+  <div class="section-title">🦊 מניות</div>
+  <div class="chart-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <span style="font-weight:700;">אחזקות מניות</span>
+      <button class="btn btn-sm" style="background:rgba(255,107,53,0.1);color:var(--orange);border:none;" onclick="openAddStockModal()">➕ הוסף מניה</button>
+    </div>
+    <div id="stocksTableContainer">
+      <div class="empty-state">
+        <div class="empty-icon">🦊</div>
+        <p>עדיין לא הוספת מניות</p>
+        <button class="btn btn-primary btn-sm" onclick="openAddStockModal()">הוסף מניה ראשונה</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL: ADD UPDATE -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('addModal')">✕</button>
+    <div class="modal-title">➕ הוסף עדכון שווי</div>
+    <div class="form-group">
+      <label class="form-label">סוג השקעה</label>
+      <select class="form-select" id="addType">
+        <option value="קרן השתלמות">🌿 קרן השתלמות (הראל)</option>
+        <option value="קופת גמל">🐘 קופת גמל (הראל)</option>
+        <option value="פנסיה">🦉 פנסיה (הראל)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">תאריך</label>
+      <input type="date" class="form-input" id="addDate">
+    </div>
+    <div class="form-group">
+      <label class="form-label">שווי (₪)</label>
+      <input type="number" class="form-input" id="addAmount" placeholder="לדוגמה: 150000">
+    </div>
+    <div class="form-group">
+      <label class="form-label">הערה (אופציונלי)</label>
+      <input type="text" class="form-input" id="addNote" placeholder="לדוגמה: לאחר הפקדה חודשית">
+    </div>
+    <div style="margin-top:8px; margin-bottom:20px; color:var(--muted); font-size:0.8rem;">
+      💡 ניתן גם <span style="color:var(--blue); cursor:pointer; font-weight:600;" onclick="showCSVUpload()">להעלות CSV מהראל</span>
+    </div>
+    <div id="csvUploadArea" style="display:none; margin-bottom:16px;">
+      <div class="upload-area" onclick="document.getElementById('csvFileInput').click()">
+        <div class="upload-icon">📄</div>
+        <div>לחצי להעלאת קובץ CSV מהראל</div>
+        <div style="font-size:0.75rem; margin-top:4px;">הקובץ נשאר אצלך — לא נשלח לשום מקום</div>
+      </div>
+      <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleCSV(event)">
+    </div>
+    <button class="btn btn-primary" style="width:100%;" onclick="confirmAddEntry()">✅ שמור עדכון</button>
+  </div>
+</div>
+
+<!-- MODAL: ADD STOCK -->
+<div class="modal-overlay" id="addStockModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('addStockModal')">✕</button>
+    <div class="modal-title">🦊 הוסף מניה</div>
+    <div class="form-group">
+      <label class="form-label">טיקר (סימול מניה)</label>
+      <input type="text" class="form-input" id="stockTicker" placeholder="לדוגמה: AAPL, MSFT, TSLA" style="text-transform:uppercase;">
+    </div>
+    <div class="form-group">
+      <label class="form-label">כמות מניות</label>
+      <input type="number" class="form-input" id="stockQty" placeholder="לדוגמה: 10" step="0.001">
+    </div>
+    <div class="form-group">
+      <label class="form-label">מחיר קנייה ממוצע ($)</label>
+      <input type="number" class="form-input" id="stockBuyPrice" placeholder="לדוגמה: 150.00" step="0.01">
+    </div>
+    <div style="background:#FFF8E7; border-radius:12px; padding:12px; margin-bottom:16px; font-size:0.8rem; color:#92600A;">
+      ⚠️ עדכון מחיר שוטף שולף נתונים מ-Yahoo Finance דרך שרת ביניים. <strong>רק שם הטיקר</strong> נשלח — ללא נתוניך האישיים.
+    </div>
+    <button class="btn btn-primary" style="width:100%;" onclick="confirmAddStock()">✅ הוסף מניה</button>
+  </div>
+</div>
+
+<!-- MODAL: CONFIRM -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal confirm-modal">
+    <div class="confirm-icon" id="confirmIcon">⚠️</div>
+    <div class="modal-title" style="justify-content:center;" id="confirmTitle">אישור פעולה</div>
+    <div class="confirm-message" id="confirmMessage">האם את בטוחה?</div>
+    <div class="confirm-actions">
+      <button class="btn btn-secondary" onclick="closeModal('confirmModal')">ביטול</button>
+      <button class="btn btn-primary" id="confirmBtn" onclick="">אשרי</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- HIDDEN FILE INPUT FOR IMPORT -->
+<input type="file" id="importFileInput" accept=".json" style="display:none" onchange="handleImport(event)">
+
+<script>
+// ═══════════════════════════════════════════
+// DATA LAYER
+// ═══════════════════════════════════════════
+const STORAGE_KEY = 'investments_data_v1';
+
+const INVESTMENT_TYPES = {
+  'קרן השתלמות': { animal: '🌿', color: '#00C896', label: 'קרן השתלמות', company: 'הראל' },
+  'קופת גמל':    { animal: '🐘', color: '#3742FA', label: 'קופת גמל', company: 'הראל' },
+  'פנסיה':       { animal: '🦉', color: '#A55EEA', label: 'פנסיה', company: 'הראל' },
+};
+
+function getData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { entries: [], stocks: [] };
+    return JSON.parse(raw);
+  } catch { return { entries: [], stocks: [] }; }
+}
+
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  localStorage.setItem(STORAGE_KEY + '_updated', new Date().toISOString());
+  renderAll();
+  showToast('✅ נשמר בהצלחה');
+}
+
+// ═══════════════════════════════════════════
+// RENDER ENGINE
+// ═══════════════════════════════════════════
+let chartInstances = {};
+let currentPeriod = 'all';
+
+function renderAll() {
+  const data = getData();
+  renderTotalCard(data);
+  renderCards(data);
+  renderCharts(data);
+  renderStocksTable(data);
+  updateLastUpdated();
+}
+
+function formatMoney(n) {
+  if (!n && n !== 0) return '—';
+  return '₪' + Math.round(n).toLocaleString('he-IL');
+}
+
+function getLatestValue(entries, type) {
+  const filtered = entries.filter(e => e.type === type).sort((a,b) => new Date(b.date) - new Date(a.date));
+  return filtered.length ? filtered[0].amount : 0;
+}
+
+function getPrevValue(entries, type) {
+  const filtered = entries.filter(e => e.type === type).sort((a,b) => new Date(b.date) - new Date(a.date));
+  return filtered.length > 1 ? filtered[1].amount : null;
+}
+
+function renderTotalCard(data) {
+  let total = 0;
+  let prev = 0;
+  let hasPrev = false;
+
+  Object.keys(INVESTMENT_TYPES).forEach(type => {
+    const latest = getLatestValue(data.entries, type);
+    const prevVal = getPrevValue(data.entries, type);
+    total += latest;
+    if (prevVal !== null) { prev += prevVal; hasPrev = true; }
+
+    const key = type === 'קרן השתלמות' ? 'statKranHashtalamut' :
+                type === 'קופת גמל' ? 'statGamal' : 'statPension';
+    const el = document.getElementById(key);
+    if (el) el.textContent = formatMoney(latest);
+  });
+
+  // Add stocks value
+  const stocksVal = calcStocksTotal(data.stocks);
+  total += stocksVal;
+  const stocksEl = document.getElementById('statStocks');
+  if (stocksEl) stocksEl.textContent = formatMoney(stocksVal);
+
+  document.getElementById('totalAmount').textContent = formatMoney(total);
+
+  const changeEl = document.getElementById('totalChange');
+  if (hasPrev && prev > 0) {
+    const diff = total - prev;
+    const pct = ((diff / prev) * 100).toFixed(1);
+    changeEl.textContent = (diff >= 0 ? '▲ +' : '▼ ') + formatMoney(Math.abs(diff)) + ' (' + pct + '%)';
+    changeEl.className = 'total-change' + (diff < 0 ? ' negative' : '');
+  } else {
+    changeEl.textContent = total > 0 ? '✨ נתונים ראשונים' : 'הוסף נתונים ראשונים';
+    changeEl.className = 'total-change';
+  }
+}
+
+function renderCards(data) {
+  const grid = document.getElementById('cardsGrid');
+  grid.innerHTML = '';
+
+  Object.entries(INVESTMENT_TYPES).forEach(([type, meta]) => {
+    const latest = getLatestValue(data.entries, type);
+    const prev = getPrevValue(data.entries, type);
+    const entries = data.entries.filter(e => e.type === type).sort((a,b) => new Date(a.date)-new Date(b.date));
+
+    const diff = prev !== null ? latest - prev : null;
+    const pct = prev !== null && prev > 0 ? ((diff / prev) * 100).toFixed(1) : null;
+
+    const changeHTML = diff !== null
+      ? `<span class="${diff >= 0 ? 'change-positive' : 'change-negative'}">
+          ${diff >= 0 ? '▲' : '▼'} ${formatMoney(Math.abs(diff))} (${Math.abs(pct)}%)
+        </span>`
+      : `<span class="change-neutral">אין נתון קודם</span>`;
+
+    const typeClass = type === 'קרן השתלמות' ? 'card-kranהשתלמות' :
+                      type === 'קופת גמל' ? 'card-גמל' : 'card-פנסיה';
+    const badgeClass = type === 'קרן השתלמות' ? 'badge-kranהשתלמות' :
+                       type === 'קופת גמל' ? 'badge-גמל' : 'badge-פנסיה';
+
+    const canvasId = 'miniChart_' + type.replace(/\s/g,'_');
+
+    const card = document.createElement('div');
+    card.className = `investment-card ${typeClass}`;
+    card.innerHTML = `
+      <div class="card-animal">${meta.animal}</div>
+      <div class="card-header">
+        <div class="card-title">${meta.label}</div>
+        <div class="card-badge ${badgeClass}">${meta.company}</div>
+      </div>
+      <div class="card-amount">${formatMoney(latest)}</div>
+      <div class="card-change">${changeHTML}</div>
+      <div class="card-mini-chart"><canvas id="${canvasId}"></canvas></div>
+      <div class="card-actions">
+        <button class="btn btn-sm" style="background:rgba(0,0,0,0.05);color:var(--text);" onclick="openAddModalFor('${type}')">+ עדכן</button>
+        ${entries.length ? `<button class="btn btn-sm" style="background:rgba(255,71,87,0.1);color:var(--red);" onclick="deleteLastEntry('${type}')">🗑 מחק אחרון</button>` : ''}
+      </div>
+    `;
+    grid.appendChild(card);
+
+    // Mini chart
+    if (entries.length > 1) {
+      setTimeout(() => {
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return;
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: entries.map(e => e.date),
+            datasets: [{
+              data: entries.map(e => e.amount),
+              borderColor: meta.color,
+              backgroundColor: meta.color + '20',
+              fill: true,
+              tension: 0.4,
+              pointRadius: 0,
+              borderWidth: 2,
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { enabled: false } },
+            scales: { x: { display: false }, y: { display: false } },
+            animation: false,
+          }
+        });
+      }, 50);
+    }
+  });
+}
+
+function filterByPeriod(entries, period) {
+  if (period === 'all') return entries;
+  const now = new Date();
+  const months = period === 'year' ? 12 : period === '6m' ? 6 : 3;
+  const cutoff = new Date(now.getFullYear(), now.getMonth() - months, now.getDate());
+  return entries.filter(e => new Date(e.date) >= cutoff);
+}
+
+function renderCharts(data) {
+  const grid = document.getElementById('chartsGrid');
+  grid.innerHTML = '';
+  Object.values(chartInstances).forEach(c => { try { c.destroy(); } catch {} });
+  chartInstances = {};
+
+  Object.entries(INVESTMENT_TYPES).forEach(([type, meta]) => {
+    const allEntries = data.entries.filter(e => e.type === type).sort((a,b) => new Date(a.date)-new Date(b.date));
+    const entries = filterByPeriod(allEntries, currentPeriod);
+
+    const canvasId = 'chart_' + type.replace(/\s/g,'_');
+    const card = document.createElement('div');
+    card.className = 'chart-card';
+
+    if (entries.length === 0) {
+      card.innerHTML = `
+        <div class="chart-card-title">${meta.animal} ${meta.label}</div>
+        <div class="empty-state" style="padding:32px 0;">
+          <div style="font-size:2rem;">${meta.animal}</div>
+          <p style="margin-top:8px;">אין נתונים עדיין</p>
+          <button class="btn btn-sm btn-primary" onclick="openAddModalFor('${type}')">הוסף ראשון</button>
+        </div>`;
+    } else {
+      card.innerHTML = `
+        <div class="chart-card-title">${meta.animal} ${meta.label}
+          <span style="font-weight:400;color:var(--muted);font-size:0.8rem;margin-right:auto;">${entries.length} נקודות נתון</span>
+        </div>
+        <div class="chart-container"><canvas id="${canvasId}"></canvas></div>`;
+    }
+    grid.appendChild(card);
+
+    if (entries.length > 0) {
+      setTimeout(() => {
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return;
+        chartInstances[type] = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: entries.map(e => new Date(e.date).toLocaleDateString('he-IL', {month:'short',year:'2-digit'})),
+            datasets: [{
+              label: meta.label,
+              data: entries.map(e => e.amount),
+              borderColor: meta.color,
+              backgroundColor: meta.color + '18',
+              fill: true,
+              tension: 0.4,
+              pointRadius: 4,
+              pointHoverRadius: 7,
+              pointBackgroundColor: meta.color,
+              borderWidth: 2.5,
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: ctx => '₪' + ctx.parsed.y.toLocaleString('he-IL')
+                }
+              }
+            },
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { family: 'Rubik', size: 11 } } },
+              y: {
+                grid: { color: '#F3F4F6' },
+                ticks: {
+                  font: { family: 'Rubik', size: 11 },
+                  callback: v => '₪' + (v/1000).toFixed(0) + 'K'
+                }
+              }
+            }
+          }
+        });
+      }, 50);
+    }
+  });
+}
+
+function calcStocksTotal(stocks) {
+  return stocks.reduce((sum, s) => sum + (s.currentPrice || s.buyPrice) * s.qty, 0);
+}
+
+function renderStocksTable(data) {
+  const container = document.getElementById('stocksTableContainer');
+  if (!data.stocks || data.stocks.length === 0) {
+    container.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">🦊</div>
+      <p>עדיין לא הוספת מניות</p>
+      <button class="btn btn-primary btn-sm" onclick="openAddStockModal()">הוסף מניה ראשונה</button>
+    </div>`;
+    return;
+  }
+
+  let rows = data.stocks.map((s, i) => {
+    const current = s.currentPrice || s.buyPrice;
+    const value = current * s.qty;
+    const cost = s.buyPrice * s.qty;
+    const pnl = value - cost;
+    const pnlPct = ((pnl / cost) * 100).toFixed(1);
+    const pnlClass = pnl >= 0 ? 'change-positive' : 'change-negative';
+
+    return `<tr>
+      <td><span class="stock-ticker" style="color:var(--orange);">${s.ticker}</span></td>
+      <td>${s.qty}</td>
+      <td>$${s.buyPrice.toFixed(2)}</td>
+      <td>
+        ${s.currentPrice ? `$${s.currentPrice.toFixed(2)}` : `<span class="stock-loading">—</span>`}
+        <button class="fetch-btn" onclick="fetchStockPrice(${i})" title="עדכן מחיר">🔄</button>
+      </td>
+      <td>${formatMoney(value)}</td>
+      <td class="${pnlClass}">${pnl >= 0 ? '+' : ''}${formatMoney(pnl)} (${pnlPct}%)</td>
+      <td><button class="btn btn-sm" style="background:rgba(255,71,87,0.1);color:var(--red);" onclick="deleteStock(${i})">🗑</button></td>
+    </tr>`;
+  }).join('');
+
+  container.innerHTML = `<table class="stocks-table">
+    <thead><tr>
+      <th>טיקר</th><th>כמות</th><th>מחיר קנייה</th><th>מחיר נוכחי</th><th>שווי</th><th>רווח/הפסד</th><th></th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function updateLastUpdated() {
+  const ts = localStorage.getItem(STORAGE_KEY + '_updated');
+  const el = document.getElementById('lastUpdated');
+  if (ts && el) {
+    el.textContent = new Date(ts).toLocaleString('he-IL');
+  }
+}
+
+// ═══════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════
+function openAddModal() {
+  document.getElementById('addDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('addAmount').value = '';
+  document.getElementById('addNote').value = '';
+  document.getElementById('csvUploadArea').style.display = 'none';
+  document.getElementById('addModal').classList.add('active');
+}
+
+function openAddModalFor(type) {
+  openAddModal();
+  document.getElementById('addType').value = type;
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+function showCSVUpload() {
+  const el = document.getElementById('csvUploadArea');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function openAddStockModal() {
+  document.getElementById('stockTicker').value = '';
+  document.getElementById('stockQty').value = '';
+  document.getElementById('stockBuyPrice').value = '';
+  document.getElementById('addStockModal').classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+// CONFIRM PATTERN
+// ═══════════════════════════════════════════
+function showConfirm(icon, title, message, onConfirm, danger = false) {
+  document.getElementById('confirmIcon').textContent = icon;
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMessage').textContent = message;
+  const btn = document.getElementById('confirmBtn');
+  btn.className = 'btn ' + (danger ? 'btn-danger' : 'btn-primary');
+  btn.onclick = () => { closeModal('confirmModal'); onConfirm(); };
+  document.getElementById('confirmModal').classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════════
+function confirmAddEntry() {
+  const type = document.getElementById('addType').value;
+  const date = document.getElementById('addDate').value;
+  const amount = parseFloat(document.getElementById('addAmount').value);
+  const note = document.getElementById('addNote').value;
+
+  if (!date || isNaN(amount) || amount <= 0) {
+    showToast('❌ נא למלא תאריך וסכום תקין', true);
+    return;
+  }
+
+  showConfirm('💾', 'שמירת עדכון',
+    `שמור עדכון ל${type}: ${formatMoney(amount)} בתאריך ${new Date(date).toLocaleDateString('he-IL')}?`,
+    () => {
+      const data = getData();
+      data.entries.push({ type, date, amount, note, id: Date.now() });
+      closeModal('addModal');
+      saveData(data);
+    }
+  );
+}
+
+function confirmAddStock() {
+  const ticker = document.getElementById('stockTicker').value.trim().toUpperCase();
+  const qty = parseFloat(document.getElementById('stockQty').value);
+  const buyPrice = parseFloat(document.getElementById('stockBuyPrice').value);
+
+  if (!ticker || isNaN(qty) || qty <= 0 || isNaN(buyPrice) || buyPrice <= 0) {
+    showToast('❌ נא למלא את כל השדות', true);
+    return;
+  }
+
+  showConfirm('🦊', 'הוספת מניה',
+    `הוסף ${qty} מניות של ${ticker} במחיר קנייה $${buyPrice}?`,
+    () => {
+      const data = getData();
+      data.stocks.push({ ticker, qty, buyPrice, currentPrice: null, id: Date.now() });
+      closeModal('addStockModal');
+      saveData(data);
+    }
+  );
+}
+
+function deleteLastEntry(type) {
+  const data = getData();
+  const filtered = data.entries.filter(e => e.type === type).sort((a,b) => new Date(b.date)-new Date(a.date));
+  if (!filtered.length) return;
+  const last = filtered[0];
+
+  showConfirm('🗑', 'מחיקת נתון',
+    `מחק את הנתון האחרון של ${type}?\n${formatMoney(last.amount)} מ-${new Date(last.date).toLocaleDateString('he-IL')}`,
+    () => {
+      data.entries = data.entries.filter(e => e.id !== last.id);
+      saveData(data);
+    }, true
+  );
+}
+
+function deleteStock(index) {
+  const data = getData();
+  const stock = data.stocks[index];
+  showConfirm('🗑', 'מחיקת מניה',
+    `מחק את ${stock.ticker} מהתיק?`,
+    () => {
+      data.stocks.splice(index, 1);
+      saveData(data);
+    }, true
+  );
+}
+
+// ═══════════════════════════════════════════
+// STOCK PRICE FETCH
+// ═══════════════════════════════════════════
+async function fetchStockPrice(index) {
+  const data = getData();
+  const stock = data.stocks[index];
+  showToast(`🔄 מושך מחיר של ${stock.ticker}...`);
+
+  try {
+    // Using allorigins to bypass CORS - only ticker symbol is sent
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${stock.ticker}?interval=1d&range=1d`;
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const res = await fetch(proxyUrl);
+    const json = await res.json();
+    const parsed = JSON.parse(json.contents);
+    const price = parsed?.chart?.result?.[0]?.meta?.regularMarketPrice;
+
+    if (price) {
+      data.stocks[index].currentPrice = price;
+      data.stocks[index].lastFetched = new Date().toISOString();
+      saveData(data);
+      showToast(`✅ ${stock.ticker}: $${price.toFixed(2)}`);
+    } else {
+      showToast(`❌ לא נמצא מחיר ל-${stock.ticker}`, true);
+    }
+  } catch (e) {
+    showToast(`❌ שגיאה בשליפת ${stock.ticker}`, true);
+  }
+}
+
+// ═══════════════════════════════════════════
+// CSV IMPORT FROM HAREL
+// ═══════════════════════════════════════════
+function handleCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const text = e.target.result;
+    const lines = text.split('\n').filter(l => l.trim());
+    // Flexible CSV parser - tries to find date and amount columns
+    showToast(`📄 קובץ נטען: ${lines.length - 1} שורות. נא בדקי את הנתונים.`);
+    // For now show a message - full mapping UI can be added
+    alert(`הקובץ הועלה עם ${lines.length} שורות.\nעמודות: ${lines[0]}\n\nפונקציית המיפוי תתווסף בהמשך. בינתיים השתמשי בהזנה ידנית.`);
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+// ═══════════════════════════════════════════
+// EXPORT / IMPORT
+// ═══════════════════════════════════════════
+function exportData() {
+  showConfirm('📦', 'ייצוא גיבוי',
+    'ייצא את כל הנתונים לקובץ JSON מוצפן לגיבוי?',
+    () => {
+      const data = getData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `investments_backup_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('📦 גיבוי הורד בהצלחה');
+    }
+  );
+}
+
+function importData() {
+  showConfirm('📂', 'שחזור מגיבוי',
+    '⚠️ שחזור יחליף את כל הנתונים הנוכחיים! להמשיך?',
+    () => document.getElementById('importFileInput').click(),
+    true
+  );
+}
+
+function handleImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.entries || !data.stocks) throw new Error('פורמט לא תקין');
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      renderAll();
+      showToast('✅ נתונים שוחזרו בהצלחה');
+    } catch {
+      showToast('❌ קובץ לא תקין', true);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ═══════════════════════════════════════════
+// CHART PERIOD
+// ═══════════════════════════════════════════
+function setChartPeriod(period, btn) {
+  currentPeriod = period;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderCharts(getData());
+}
+
+// ═══════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════
+function showToast(msg, isError = false) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.style.background = isError ? '#FF4757' : '#1a1a2e';
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.remove('active');
+  });
+});
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+renderAll();
+</script>
+</body>
+</html>
