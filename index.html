@@ -242,8 +242,10 @@
         <option value="קופת גמל">קופת גמל (הראל)</option>
         <option value="קרן השתלמות">קרן השתלמות (הראל)</option>
         <option value="חיסכון בבנק">חיסכון בבנק</option>
-        <option value="קופת אליענה">קופת אליענה (גמל להשקעה)</option>
-        <option value="קופת אוריאל">קופת אוריאל (גמל להשקעה)</option>
+        <option value="אליענה הראל">אליענה — הראל</option>
+        <option value="אליענה אנליסט">אליענה — אנליסט</option>
+        <option value="אוריאל הראל">אוריאל — הראל</option>
+        <option value="אוריאל אינפיניטי">אוריאל — אינפיניטי</option>
         <option value="פנסיה מיכל">פנסיה מיכל (הראל)</option>
         <option value="פנסיה דור">פנסיה דור (הפניקס)</option>
       </select>
@@ -321,10 +323,12 @@ const MAIN_TYPES = {
   'קרן השתלמות': { cls:'hashtalm', color:'#43d19e', label:'קרן השתלמות', sub:'הראל' },
   'חיסכון בבנק': { cls:'bank',     color:'#34d399', label:'חיסכון בבנק', sub:'בנק' },
 };
-// Side types (not in total)
+// Side types (not in total) — split by company
 const SIDE_TYPES = {
-  'קופת אליענה': { cls:'eliena', color:'#c084fc', label:'קופת אליענה', sub:'גמל להשקעה' },
-  'קופת אוריאל': { cls:'oriel',  color:'#fb923c', label:'קופת אוריאל', sub:'גמל להשקעה' },
+  'אליענה הראל':    { cls:'eliena',  color:'#c084fc', label:'אליענה — הראל',    sub:'גמל להשקעה' },
+  'אליענה אנליסט':  { cls:'eliena',  color:'#a855f7', label:'אליענה — אנליסט',  sub:'גמל להשקעה' },
+  'אוריאל הראל':    { cls:'oriel',   color:'#fb923c', label:'אוריאל — הראל',    sub:'גמל להשקעה' },
+  'אוריאל אינפיניטי':{ cls:'oriel',  color:'#f97316', label:'אוריאל — אינפיניטי',sub:'גמל להשקעה' },
 };
 // Pension types (separate section)
 const PENSION_TYPES = {
