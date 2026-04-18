@@ -217,7 +217,13 @@
   <div class="stocks-wrap">
     <div class="stocks-header">
       <span class="stocks-header-title">אחזקות מניות</span>
-      <button class="btn btn-ghost btn-sm" onclick="openAddStock()">+ הוסף מניה</button>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:0.78rem;color:var(--muted);">שער $:</span>
+        <span id="usdRateDisplay" style="font-size:0.9rem;font-weight:600;color:var(--c-stocks);">—</span>
+        <button class="refresh-btn" onclick="fetchUsdRate()">↻ עדכן שער</button>
+        <span id="usdRateTime" style="font-size:0.72rem;color:var(--faint);"></span>
+        <button class="btn btn-ghost btn-sm" onclick="openAddStock()">+ הוסף מניה</button>
+      </div>
     </div>
     <div id="stocksBody"></div>
     <div class="fetch-note">⚠️ עדכון מחיר שולח רק את שם הטיקר לשרת ביניים. הנתונים האישיים שלך לא נשלחים.</div>
@@ -359,7 +365,36 @@ function render() {
 
 const fmt  = n=>(n||n===0)?'₪'+Math.round(n).toLocaleString('he-IL'):'₪—';
 const fmtS = n=>n!=null?'$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
-const calcStocks = stocks=>(stocks||[]).reduce((s,st)=>s+(st.currentPrice||st.buyPrice)*st.qty,0);
+const USD_KEY = 'usd_rate_v1';
+function getUsdRate() {
+  try { const r=localStorage.getItem(USD_KEY); return r?JSON.parse(r):{rate:null,ts:null}; }
+  catch { return {rate:null,ts:null}; }
+}
+function saveUsdRate(rate) {
+  localStorage.setItem(USD_KEY, JSON.stringify({rate, ts:new Date().toISOString()}));
+  renderUsdRate(); render();
+}
+function renderUsdRate() {
+  const {rate,ts}=getUsdRate();
+  document.getElementById('usdRateDisplay').textContent = rate ? '₪'+Number(rate).toFixed(3) : '—';
+  document.getElementById('usdRateTime').textContent = ts ? new Date(ts).toLocaleString('he-IL') : '';
+}
+async function fetchUsdRate() {
+  toast('מושך שער דולר...');
+  try {
+    const url='https://query1.finance.yahoo.com/v8/finance/chart/USDILS=X?interval=1d&range=1d';
+    const res=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+    const j=await res.json(), parsed=JSON.parse(j.contents);
+    const rate=parsed?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if(rate){ saveUsdRate(rate); toast(`שער דולר: ₪${rate.toFixed(3)} ✅`); }
+    else toast('לא נמצא שער דולר',true);
+  } catch { toast('שגיאה בשליפת שער דולר',true); }
+}
+const calcStocks = stocks => {
+  const {rate} = getUsdRate();
+  const usd = rate || 1;
+  return (stocks||[]).reduce((s,st)=>s+(st.currentPrice||st.buyPrice)*st.qty*usd, 0);
+};
 
 function renderTotal(data) {
   let total=0, prev=0, hasPrev=false;
@@ -490,10 +525,24 @@ function renderPension(data) {
 function renderStocks(data) {
   const body=document.getElementById('stocksBody');
   if(!data.stocks||!data.stocks.length){body.innerHTML='<div class="empty-cell">עדיין לא הוספת מניות</div>';return;}
-  body.innerHTML=`<table><thead><tr><th>טיקר</th><th>כמות</th><th>מחיר קנייה</th><th>מחיר נוכחי</th><th>שווי (₪)</th><th>רווח/הפסד</th><th></th></tr></thead><tbody>${
+  const {rate} = getUsdRate();
+  const usd = rate || null;
+  const rateNote = usd ? `<span style="font-size:0.72rem;color:var(--faint);margin-right:6px;">× ₪${usd.toFixed(3)}</span>` : `<span style="font-size:0.72rem;color:var(--red);margin-right:6px;">⚠️ חסר שער $</span>`;
+  body.innerHTML=`<table><thead><tr><th>טיקר</th><th>כמות</th><th>מחיר קנייה ($)</th><th>מחיר נוכחי ($)</th><th>שווי ($)</th><th>שווי (₪) ${usd?'':'⚠️'}</th><th>רווח/הפסד ($)</th><th></th></tr></thead><tbody>${
     data.stocks.map((s,i)=>{
-      const cur=s.currentPrice||s.buyPrice, val=cur*s.qty, cost=s.buyPrice*s.qty, pnl=val-cost, pct=((pnl/cost)*100).toFixed(1);
-      return `<tr><td><span class="ticker">${s.ticker}</span></td><td>${Number(s.qty).toLocaleString()}</td><td>${fmtS(s.buyPrice)}</td><td>${s.currentPrice?fmtS(s.currentPrice):'<span style="color:var(--faint)">—</span>'} <button class="refresh-btn" onclick="fetchPrice(${i})">↻</button></td><td>${fmt(val)}</td><td class="${pnl>=0?'pos':'neg'}">${pnl>=0?'+':''}${fmt(pnl)} (${pct}%)</td><td><button class="btn btn-danger btn-sm" onclick="deleteStock(${i})">✕</button></td></tr>`;
+      const cur=s.currentPrice||s.buyPrice;
+      const valUsd=cur*s.qty, costUsd=s.buyPrice*s.qty, pnlUsd=valUsd-costUsd, pct=((pnlUsd/costUsd)*100).toFixed(1);
+      const valIls = usd ? valUsd*usd : null;
+      return `<tr>
+        <td><span class="ticker">${s.ticker}</span></td>
+        <td>${Number(s.qty).toLocaleString()}</td>
+        <td>${fmtS(s.buyPrice)}</td>
+        <td>${s.currentPrice?fmtS(s.currentPrice):'<span style="color:var(--faint)">—</span>'} <button class="refresh-btn" onclick="fetchPrice(${i})">↻</button></td>
+        <td>${fmtS(valUsd)}</td>
+        <td>${valIls?fmt(valIls):'<span style="color:var(--faint)">—</span>'}${rateNote}</td>
+        <td class="${pnlUsd>=0?'pos':'neg'}">${pnlUsd>=0?'+':''}${fmtS(pnlUsd)} (${pct}%)</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteStock(${i})">✕</button></td>
+      </tr>`;
     }).join('')
   }</tbody></table>`;
 }
@@ -590,6 +639,7 @@ function toast(msg,err=false){
 }
 
 render();
+renderUsdRate();
 </script>
 </body>
 </html>
