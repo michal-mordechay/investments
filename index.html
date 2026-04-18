@@ -8,149 +8,117 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   :root {
-    --bg:        #0f0f13;
-    --surface:   #18181f;
-    --surface2:  #1f1f28;
-    --border:    rgba(255,255,255,0.07);
-    --text:      #f0f0f5;
-    --muted:     #888899;
-    --faint:     #444455;
-    --c-gamal:    #5b8dee;
-    --c-hashtalm: #43d19e;
-    --c-eliena:   #c084fc;
-    --c-oriel:    #fb923c;
-    --c-stocks:   #f59e0b;
-    --c-pension:  #64748b;
-    --green: #43d19e;
-    --red:   #f87171;
-    --radius: 14px;
+    --bg:#0f0f13; --surface:#18181f; --surface2:#1f1f28;
+    --border:rgba(255,255,255,0.07); --text:#f0f0f5; --muted:#888899; --faint:#444455;
+    --c-gamal:#5b8dee; --c-hashtalm:#43d19e; --c-eliena:#c084fc;
+    --c-oriel:#fb923c; --c-stocks:#f59e0b; --c-bank:#34d399;
+    --c-pension-m:#e879f9; --c-pension-d:#94a3b8;
+    --green:#43d19e; --red:#f87171; --radius:14px;
   }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Rubik',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; font-size:14px; }
-
-  .header { background:var(--surface); border-bottom:1px solid var(--border); padding:18px 28px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
-  .logo { font-size:1.15rem; font-weight:600; letter-spacing:-0.3px; }
-  .logo span { color:var(--c-hashtalm); }
-  .header-sub { color:var(--muted); font-size:0.78rem; margin-top:2px; }
-  .header-actions { display:flex; gap:8px; }
-
-  .btn { padding:8px 16px; border:none; border-radius:8px; font-family:'Rubik',sans-serif; font-size:0.8rem; font-weight:500; cursor:pointer; transition:all 0.15s; display:inline-flex; align-items:center; gap:5px; }
-  .btn:hover { filter:brightness(1.15); }
-  .btn-primary { background:var(--c-hashtalm); color:#0f0f13; }
-  .btn-ghost   { background:var(--surface2); color:var(--text); border:1px solid var(--border); }
-  .btn-danger  { background:rgba(248,113,113,0.15); color:var(--red); border:1px solid rgba(248,113,113,0.25); }
-  .btn-sm      { padding:5px 11px; font-size:0.75rem; }
-
-  .main { padding:24px 28px; max-width:1300px; margin:0 auto; }
-
-  .section-title { font-size:0.7rem; font-weight:600; color:var(--muted); letter-spacing:1.2px; text-transform:uppercase; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
-  .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
-
-  .total-bar { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px 28px; margin-bottom:24px; display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; }
-  .total-main { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; }
-  .total-label { color:var(--muted); font-size:0.8rem; }
-  .total-amount { font-size:2.4rem; font-weight:700; letter-spacing:-1px; line-height:1; }
-  .total-badge { font-size:0.8rem; font-weight:500; padding:3px 10px; border-radius:20px; }
-  .badge-up   { background:rgba(67,209,158,0.12); color:var(--green); }
-  .badge-down { background:rgba(248,113,113,0.12); color:var(--red); }
-  .badge-neu  { background:var(--surface2); color:var(--muted); }
-  .total-breakdown { display:flex; gap:20px; flex-wrap:wrap; }
-  .breakdown-item { text-align:center; }
-  .breakdown-val { font-size:1rem; font-weight:600; }
-  .breakdown-lbl { font-size:0.72rem; color:var(--muted); margin-top:2px; }
-
-  .cards-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; margin-bottom:28px; }
-
-  .inv-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; transition:border-color 0.15s,transform 0.15s; position:relative; overflow:hidden; }
-  .inv-card:hover { transform:translateY(-2px); border-color:rgba(255,255,255,0.14); }
-  .inv-card::before { content:''; position:absolute; top:0; right:0; left:0; height:2px; border-radius:var(--radius) var(--radius) 0 0; }
-  .card-gamal::before    { background:var(--c-gamal); }
-  .card-hashtalm::before { background:var(--c-hashtalm); }
-  .card-eliena::before   { background:var(--c-eliena); }
-  .card-oriel::before    { background:var(--c-oriel); }
-  .card-stocks::before   { background:var(--c-stocks); }
-  .card-pension::before  { background:var(--c-pension); }
-
-  .card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; }
-  .card-name { font-size:0.8rem; color:var(--muted); font-weight:500; }
-  .card-dot  { width:8px; height:8px; border-radius:50%; margin-top:3px; flex-shrink:0; }
-  .dot-gamal    { background:var(--c-gamal); }
-  .dot-hashtalm { background:var(--c-hashtalm); }
-  .dot-eliena   { background:var(--c-eliena); }
-  .dot-oriel    { background:var(--c-oriel); }
-  .dot-stocks   { background:var(--c-stocks); }
-  .dot-pension  { background:var(--c-pension); }
-
-  .card-amount { font-size:1.55rem; font-weight:700; letter-spacing:-0.5px; margin-bottom:6px; }
-  .card-change { font-size:0.78rem; font-weight:500; }
-  .pos { color:var(--green); }
-  .neg { color:var(--red); }
-  .neu { color:var(--muted); }
-  .card-sparkline { margin-top:14px; height:48px; }
-  .card-actions { display:flex; gap:6px; margin-top:14px; }
-
-  .divider { height:1px; background:var(--border); margin:28px 0; }
-
-  .tabs { display:flex; gap:2px; background:var(--surface2); border-radius:8px; padding:3px; width:fit-content; margin-bottom:18px; }
-  .tab { padding:6px 16px; border:none; border-radius:6px; font-family:'Rubik',sans-serif; font-size:0.78rem; font-weight:500; cursor:pointer; transition:all 0.15s; background:transparent; color:var(--muted); }
-  .tab.active { background:var(--surface); color:var(--text); }
-
-  .charts-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(380px,1fr)); gap:14px; margin-bottom:28px; }
-  .chart-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; }
-  .chart-card-title { font-size:0.82rem; font-weight:600; color:var(--muted); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
-  .chart-container { height:180px; position:relative; }
-
-  .pension-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; gap:24px; }
-  .pension-left { display:flex; align-items:center; gap:12px; }
-  .pension-dot { width:10px; height:10px; border-radius:50%; background:var(--c-pension); flex-shrink:0; }
-  .pension-label { font-size:0.82rem; color:var(--muted); }
-  .pension-amount { font-size:1.6rem; font-weight:700; letter-spacing:-0.5px; }
-  .pension-note { font-size:0.75rem; color:var(--muted); margin-top:2px; }
-
-  .stocks-wrap { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:28px; }
-  .stocks-header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
-  .stocks-header-title { font-size:0.82rem; font-weight:600; color:var(--muted); }
-  table { width:100%; border-collapse:collapse; }
-  th { padding:10px 16px; font-size:0.72rem; font-weight:600; color:var(--faint); text-align:right; letter-spacing:0.5px; text-transform:uppercase; border-bottom:1px solid var(--border); }
-  td { padding:12px 16px; font-size:0.85rem; border-bottom:1px solid rgba(255,255,255,0.04); }
-  tr:last-child td { border-bottom:none; }
-  .ticker { font-weight:700; font-size:0.95rem; color:var(--c-stocks); }
-  .refresh-btn { background:none; border:1px solid var(--faint); color:var(--muted); border-radius:6px; padding:3px 8px; font-size:0.72rem; cursor:pointer; transition:all 0.15s; font-family:'Rubik',sans-serif; }
-  .refresh-btn:hover { border-color:var(--c-stocks); color:var(--c-stocks); }
-  .fetch-note { padding:10px 16px; border-top:1px solid var(--border); font-size:0.72rem; color:var(--faint); }
-
-  .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(6px); z-index:500; align-items:center; justify-content:center; }
-  .overlay.open { display:flex; }
-  .modal { background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:28px; width:90%; max-width:440px; position:relative; animation:pop 0.2s cubic-bezier(0.34,1.56,0.64,1); }
-  @keyframes pop { from{transform:scale(0.92) translateY(12px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
-  .modal-title { font-size:1rem; font-weight:600; margin-bottom:20px; }
-  .modal-close { position:absolute; top:16px; left:16px; background:none; border:none; color:var(--muted); cursor:pointer; font-size:1.1rem; transition:color 0.15s; }
-  .modal-close:hover { color:var(--text); }
-
-  .form-group { margin-bottom:14px; }
-  .form-label { font-size:0.78rem; color:var(--muted); font-weight:500; margin-bottom:5px; display:block; }
-  .form-input,.form-select { width:100%; padding:10px 14px; background:var(--bg); border:1px solid var(--border); border-radius:8px; font-family:'Rubik',sans-serif; font-size:0.88rem; color:var(--text); outline:none; transition:border-color 0.15s; }
-  .form-input:focus,.form-select:focus { border-color:var(--c-hashtalm); }
-  .form-input { direction:ltr; text-align:right; }
-  .form-select option { background:var(--surface); }
-
-  .confirm-modal { text-align:center; max-width:340px; }
-  .confirm-icon { font-size:2.4rem; margin-bottom:10px; }
-  .confirm-msg  { color:var(--muted); font-size:0.88rem; margin-bottom:22px; line-height:1.5; }
-  .confirm-btns { display:flex; gap:10px; justify-content:center; }
-
-  .warn-box { background:rgba(251,146,60,0.08); border:1px solid rgba(251,146,60,0.2); border-radius:8px; padding:10px 14px; font-size:0.78rem; color:#fb923c; margin-bottom:16px; line-height:1.5; }
-
-  #toasts { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:6px; align-items:center; }
-  .toast { background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:10px 20px; border-radius:12px; font-size:0.82rem; animation:slideUp 0.25s ease; white-space:nowrap; }
-  .toast.err { border-color:rgba(248,113,113,0.4); background:rgba(248,113,113,0.1); color:var(--red); }
-  @keyframes slideUp { from{transform:translateY(12px);opacity:0} to{transform:translateY(0);opacity:1} }
-
-  .empty-cell { text-align:center; padding:40px; color:var(--muted); font-size:0.85rem; }
-  .upload-area { border:1px dashed var(--faint); border-radius:8px; padding:18px; text-align:center; cursor:pointer; color:var(--muted); font-size:0.82rem; transition:border-color 0.15s; }
-  .upload-area:hover { border-color:var(--c-hashtalm); }
-
-  @media(max-width:700px){.main{padding:14px}.header{padding:14px}.total-breakdown{display:none}.charts-grid{grid-template-columns:1fr}.cards-grid{grid-template-columns:1fr 1fr}}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Rubik',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+  .header{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  .logo{font-size:1.15rem;font-weight:600;letter-spacing:-0.3px;}
+  .logo span{color:var(--c-hashtalm);}
+  .header-sub{color:var(--muted);font-size:0.78rem;margin-top:2px;}
+  .header-actions{display:flex;gap:8px;}
+  .btn{padding:8px 16px;border:none;border-radius:8px;font-family:'Rubik',sans-serif;font-size:0.8rem;font-weight:500;cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:5px;}
+  .btn:hover{filter:brightness(1.15);}
+  .btn-primary{background:var(--c-hashtalm);color:#0f0f13;}
+  .btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+  .btn-danger{background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.25);}
+  .btn-sm{padding:5px 11px;font-size:0.75rem;}
+  .main{padding:24px 28px;max-width:1300px;margin:0 auto;}
+  .section-title{font-size:0.7rem;font-weight:600;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+  .total-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 28px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+  .total-main{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
+  .total-label{color:var(--muted);font-size:0.8rem;}
+  .total-amount{font-size:2.4rem;font-weight:700;letter-spacing:-1px;line-height:1;}
+  .total-badge{font-size:0.8rem;font-weight:500;padding:3px 10px;border-radius:20px;}
+  .badge-up{background:rgba(67,209,158,0.12);color:var(--green);}
+  .badge-down{background:rgba(248,113,113,0.12);color:var(--red);}
+  .badge-neu{background:var(--surface2);color:var(--muted);}
+  .total-breakdown{display:flex;gap:20px;flex-wrap:wrap;}
+  .breakdown-item{text-align:center;}
+  .breakdown-val{font-size:1rem;font-weight:600;}
+  .breakdown-lbl{font-size:0.72rem;color:var(--muted);margin-top:2px;}
+  .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:28px;}
+  .inv-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;transition:border-color 0.15s,transform 0.15s;position:relative;overflow:hidden;}
+  .inv-card:hover{transform:translateY(-2px);border-color:rgba(255,255,255,0.14);}
+  .inv-card::before{content:'';position:absolute;top:0;right:0;left:0;height:2px;border-radius:var(--radius) var(--radius) 0 0;}
+  .card-gamal::before{background:var(--c-gamal);}
+  .card-hashtalm::before{background:var(--c-hashtalm);}
+  .card-eliena::before{background:var(--c-eliena);}
+  .card-oriel::before{background:var(--c-oriel);}
+  .card-stocks::before{background:var(--c-stocks);}
+  .card-bank::before{background:var(--c-bank);}
+  .card-pension-m::before{background:var(--c-pension-m);}
+  .card-pension-d::before{background:var(--c-pension-d);}
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+  .card-name{font-size:0.8rem;color:var(--muted);font-weight:500;}
+  .card-dot{width:8px;height:8px;border-radius:50%;margin-top:3px;flex-shrink:0;}
+  .dot-gamal{background:var(--c-gamal);} .dot-hashtalm{background:var(--c-hashtalm);}
+  .dot-eliena{background:var(--c-eliena);} .dot-oriel{background:var(--c-oriel);}
+  .dot-stocks{background:var(--c-stocks);} .dot-bank{background:var(--c-bank);}
+  .dot-pension-m{background:var(--c-pension-m);} .dot-pension-d{background:var(--c-pension-d);}
+  .card-amount{font-size:1.55rem;font-weight:700;letter-spacing:-0.5px;margin-bottom:6px;}
+  .card-change{font-size:0.78rem;font-weight:500;}
+  .pos{color:var(--green);} .neg{color:var(--red);} .neu{color:var(--muted);}
+  .card-sparkline{margin-top:14px;height:48px;}
+  .card-actions{display:flex;gap:6px;margin-top:14px;}
+  .divider{height:1px;background:var(--border);margin:28px 0;}
+  .tabs{display:flex;gap:2px;background:var(--surface2);border-radius:8px;padding:3px;width:fit-content;margin-bottom:18px;}
+  .tab{padding:6px 16px;border:none;border-radius:6px;font-family:'Rubik',sans-serif;font-size:0.78rem;font-weight:500;cursor:pointer;transition:all 0.15s;background:transparent;color:var(--muted);}
+  .tab.active{background:var(--surface);color:var(--text);}
+  .charts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px;margin-bottom:28px;}
+  .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+  .chart-card-title{font-size:0.82rem;font-weight:600;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .chart-container{height:180px;position:relative;}
+  .pension-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+  .pension-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .pension-left{display:flex;align-items:center;gap:12px;}
+  .pension-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .pension-label{font-size:0.82rem;color:var(--muted);}
+  .pension-amount{font-size:1.5rem;font-weight:700;letter-spacing:-0.5px;}
+  .pension-note{font-size:0.75rem;color:var(--muted);margin-top:2px;}
+  .stocks-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:28px;}
+  .stocks-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+  .stocks-header-title{font-size:0.82rem;font-weight:600;color:var(--muted);}
+  table{width:100%;border-collapse:collapse;}
+  th{padding:10px 16px;font-size:0.72rem;font-weight:600;color:var(--faint);text-align:right;letter-spacing:0.5px;text-transform:uppercase;border-bottom:1px solid var(--border);}
+  td{padding:12px 16px;font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.04);}
+  tr:last-child td{border-bottom:none;}
+  .ticker{font-weight:700;font-size:0.95rem;color:var(--c-stocks);}
+  .refresh-btn{background:none;border:1px solid var(--faint);color:var(--muted);border-radius:6px;padding:3px 8px;font-size:0.72rem;cursor:pointer;transition:all 0.15s;font-family:'Rubik',sans-serif;}
+  .refresh-btn:hover{border-color:var(--c-stocks);color:var(--c-stocks);}
+  .fetch-note{padding:10px 16px;border-top:1px solid var(--border);font-size:0.72rem;color:var(--faint);}
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);z-index:500;align-items:center;justify-content:center;}
+  .overlay.open{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:28px;width:90%;max-width:440px;position:relative;animation:pop 0.2s cubic-bezier(0.34,1.56,0.64,1);}
+  @keyframes pop{from{transform:scale(0.92) translateY(12px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+  .modal-title{font-size:1rem;font-weight:600;margin-bottom:20px;}
+  .modal-close{position:absolute;top:16px;left:16px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;transition:color 0.15s;}
+  .modal-close:hover{color:var(--text);}
+  .form-group{margin-bottom:14px;}
+  .form-label{font-size:0.78rem;color:var(--muted);font-weight:500;margin-bottom:5px;display:block;}
+  .form-input,.form-select{width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:'Rubik',sans-serif;font-size:0.88rem;color:var(--text);outline:none;transition:border-color 0.15s;}
+  .form-input:focus,.form-select:focus{border-color:var(--c-hashtalm);}
+  .form-input{direction:ltr;text-align:right;}
+  .form-select option{background:var(--surface);}
+  .confirm-modal{text-align:center;max-width:340px;}
+  .confirm-icon{font-size:2.4rem;margin-bottom:10px;}
+  .confirm-msg{color:var(--muted);font-size:0.88rem;margin-bottom:22px;line-height:1.5;}
+  .confirm-btns{display:flex;gap:10px;justify-content:center;}
+  .warn-box{background:rgba(251,146,60,0.08);border:1px solid rgba(251,146,60,0.2);border-radius:8px;padding:10px 14px;font-size:0.78rem;color:#fb923c;margin-bottom:16px;line-height:1.5;}
+  #toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:6px;align-items:center;}
+  .toast{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 20px;border-radius:12px;font-size:0.82rem;animation:slideUp 0.25s ease;white-space:nowrap;}
+  .toast.err{border-color:rgba(248,113,113,0.4);background:rgba(248,113,113,0.1);color:var(--red);}
+  @keyframes slideUp{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .empty-cell{text-align:center;padding:40px;color:var(--muted);font-size:0.85rem;}
+  .upload-area{border:1px dashed var(--faint);border-radius:8px;padding:18px;text-align:center;cursor:pointer;color:var(--muted);font-size:0.82rem;transition:border-color 0.15s;}
+  .upload-area:hover{border-color:var(--c-hashtalm);}
+  @media(max-width:700px){.main{padding:14px}.header{padding:14px}.total-breakdown{display:none}.charts-grid{grid-template-columns:1fr}.cards-grid{grid-template-columns:1fr 1fr}.pension-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -169,20 +137,31 @@
 
 <div class="main">
 
+  <!-- TOTAL -->
   <div class="total-bar">
     <div class="total-main">
-      <div class="total-label">סה״כ תיק (ללא פנסיה)</div>
-      <div class="total-amount" id="totalAmt">₪—</div>
-      <div class="total-badge badge-neu" id="totalBadge">—</div>
+      <div>
+        <div class="total-label">סה״כ תיק — ללא פנסיה, ללא אליענה ואוריאל</div>
+        <div style="display:flex;align-items:baseline;gap:12px;margin-top:4px;">
+          <div class="total-amount" id="totalAmt">₪—</div>
+          <div class="total-badge badge-neu" id="totalBadge">—</div>
+        </div>
+      </div>
     </div>
     <div class="total-breakdown" id="totalBreakdown"></div>
   </div>
 
-  <div class="section-title">השקעות</div>
+  <!-- MAIN CARDS -->
+  <div class="section-title">השקעות עיקריות</div>
   <div class="cards-grid" id="cardsGrid"></div>
+
+  <!-- SIDE ACCOUNTS -->
+  <div class="section-title">קופות ילדים וחיסכון</div>
+  <div class="cards-grid" id="sideGrid"></div>
 
   <div class="divider"></div>
 
+  <!-- CHARTS -->
   <div class="section-title">גרפים לאורך זמן</div>
   <div class="tabs">
     <button class="tab active" onclick="setPeriod('all',this)">הכל</button>
@@ -194,25 +173,46 @@
 
   <div class="divider"></div>
 
+  <!-- PENSION -->
   <div class="section-title">פנסיה</div>
-  <div class="pension-card">
-    <div class="pension-left">
-      <div class="pension-dot"></div>
-      <div>
-        <div class="pension-label">קרן פנסיה — מיכל (הראל)</div>
-        <div class="pension-amount" id="pensionAmt">₪—</div>
-        <div class="pension-note" id="pensionNote">—</div>
+  <div class="pension-grid">
+    <div class="pension-card">
+      <div class="pension-left">
+        <div class="pension-dot" style="background:var(--c-pension-m)"></div>
+        <div>
+          <div class="pension-label">פנסיה מיכל — הראל</div>
+          <div class="pension-amount" id="pensionMichalAmt">₪—</div>
+          <div class="pension-note" id="pensionMichalNote">—</div>
+        </div>
       </div>
+      <button class="btn btn-ghost btn-sm" onclick="openAdd('פנסיה מיכל')">+ עדכן</button>
     </div>
-    <button class="btn btn-ghost btn-sm" onclick="openAdd('פנסיה')">+ עדכן</button>
+    <div class="pension-card">
+      <div class="pension-left">
+        <div class="pension-dot" style="background:var(--c-pension-d)"></div>
+        <div>
+          <div class="pension-label">פנסיה דור — הפניקס</div>
+          <div class="pension-amount" id="pensionDorAmt">₪—</div>
+          <div class="pension-note" id="pensionDorNote">—</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="openAdd('פנסיה דור')">+ עדכן</button>
+    </div>
   </div>
-  <div class="chart-card" style="margin-bottom:28px;">
-    <div class="chart-card-title"><span style="color:var(--c-pension)">●</span> פנסיה לאורך זמן</div>
-    <div class="chart-container"><canvas id="pensionChart"></canvas></div>
+  <div class="charts-grid" style="margin-bottom:28px;">
+    <div class="chart-card">
+      <div class="chart-card-title"><span style="color:var(--c-pension-m)">●</span> פנסיה מיכל לאורך זמן</div>
+      <div class="chart-container"><canvas id="pensionMichalChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title"><span style="color:var(--c-pension-d)">●</span> פנסיה דור לאורך זמן</div>
+      <div class="chart-container"><canvas id="pensionDorChart"></canvas></div>
+    </div>
   </div>
 
   <div class="divider"></div>
 
+  <!-- STOCKS -->
   <div class="section-title">מניות</div>
   <div class="stocks-wrap">
     <div class="stocks-header">
@@ -235,9 +235,11 @@
       <select class="form-select" id="addType">
         <option value="קופת גמל">קופת גמל (הראל)</option>
         <option value="קרן השתלמות">קרן השתלמות (הראל)</option>
+        <option value="חיסכון בבנק">חיסכון בבנק</option>
         <option value="קופת אליענה">קופת אליענה (גמל להשקעה)</option>
         <option value="קופת אוריאל">קופת אוריאל (גמל להשקעה)</option>
-        <option value="פנסיה">פנסיה (הראל)</option>
+        <option value="פנסיה מיכל">פנסיה מיכל (הראל)</option>
+        <option value="פנסיה דור">פנסיה דור (הפניקס)</option>
       </select>
     </div>
     <div class="form-group">
@@ -271,18 +273,18 @@
   <div class="modal">
     <button class="modal-close" onclick="closeModal('stockOverlay')">✕</button>
     <div class="modal-title">הוספת מניה</div>
-    <div class="warn-box">עדכון מחיר שולח רק את שם הטיקר לשרת ביניים. הנתונים האישיים שלך לא נשלחים לשום מקום.</div>
+    <div class="warn-box">עדכון מחיר שולח רק את שם הטיקר לשרת ביניים. הנתונים האישיים שלך לא נשלחים.</div>
     <div class="form-group">
       <label class="form-label">טיקר</label>
       <input type="text" class="form-input" id="sTicker" placeholder="AAPL, INTC, MBLY..." style="text-transform:uppercase;">
     </div>
     <div class="form-group">
       <label class="form-label">כמות מניות</label>
-      <input type="number" class="form-input" id="sQty" placeholder="10" step="0.001">
+      <input type="number" class="form-input" id="sQty" step="0.001">
     </div>
     <div class="form-group">
       <label class="form-label">מחיר קנייה ממוצע ($)</label>
-      <input type="number" class="form-input" id="sBuy" placeholder="150.00" step="0.01">
+      <input type="number" class="form-input" id="sBuy" step="0.01">
     </div>
     <button class="btn btn-primary" style="width:100%;margin-top:4px;" onclick="submitStock()">הוסף</button>
   </div>
@@ -305,393 +307,286 @@
 <input type="file" id="importIn" accept=".json" style="display:none" onchange="handleImport(event)">
 
 <script>
-const KEY = 'inv_v2';
+const KEY = 'inv_v3';
 
-const TYPES = {
+// Main types shown in total bar + main cards
+const MAIN_TYPES = {
   'קופת גמל':    { cls:'gamal',    color:'#5b8dee', label:'קופת גמל',    sub:'הראל' },
   'קרן השתלמות': { cls:'hashtalm', color:'#43d19e', label:'קרן השתלמות', sub:'הראל' },
-  'קופת אליענה': { cls:'eliena',   color:'#c084fc', label:'קופת אליענה', sub:'גמל להשקעה' },
-  'קופת אוריאל': { cls:'oriel',    color:'#fb923c', label:'קופת אוריאל', sub:'גמל להשקעה' },
+  'חיסכון בבנק': { cls:'bank',     color:'#34d399', label:'חיסכון בבנק', sub:'בנק' },
 };
-const PENSION = 'פנסיה';
-const MAIN_TYPES = Object.keys(TYPES);
+// Side types (not in total)
+const SIDE_TYPES = {
+  'קופת אליענה': { cls:'eliena', color:'#c084fc', label:'קופת אליענה', sub:'גמל להשקעה' },
+  'קופת אוריאל': { cls:'oriel',  color:'#fb923c', label:'קופת אוריאל', sub:'גמל להשקעה' },
+};
+// Pension types (separate section)
+const PENSION_TYPES = {
+  'פנסיה מיכל': { cls:'pension-m', color:'#e879f9', label:'פנסיה מיכל', sub:'הראל', chartId:'pensionMichalChart', amtId:'pensionMichalAmt', noteId:'pensionMichalNote' },
+  'פנסיה דור':  { cls:'pension-d', color:'#94a3b8', label:'פנסיה דור',  sub:'הפניקס', chartId:'pensionDorChart',   amtId:'pensionDorAmt',   noteId:'pensionDorNote' },
+};
+// All chart types (main + side, no pension)
+const CHART_TYPES = { ...MAIN_TYPES, ...SIDE_TYPES };
 
 function load() {
-  try { const r = localStorage.getItem(KEY); return r ? JSON.parse(r) : {entries:[],stocks:[]}; }
+  try { const r=localStorage.getItem(KEY); return r?JSON.parse(r):{entries:[],stocks:[]}; }
   catch { return {entries:[],stocks:[]}; }
 }
 function save(data) {
   localStorage.setItem(KEY, JSON.stringify(data));
   localStorage.setItem(KEY+'_ts', new Date().toISOString());
-  render();
-  toast('✅ נשמר');
+  render(); toast('✅ נשמר');
 }
 
 function latestOf(entries, type) {
-  const f = entries.filter(e=>e.type===type).sort((a,b)=>new Date(b.date)-new Date(a.date));
-  return f.length ? f[0] : null;
+  const f=entries.filter(e=>e.type===type).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  return f.length?f[0]:null;
 }
 function prevOf(entries, type) {
-  const f = entries.filter(e=>e.type===type).sort((a,b)=>new Date(b.date)-new Date(a.date));
-  return f.length > 1 ? f[1] : null;
+  const f=entries.filter(e=>e.type===type).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  return f.length>1?f[1]:null;
 }
 
-let chartObjs = {};
-let period = 'all';
+let chartObjs={}, pensionCharts={}, period='all';
 
 function render() {
-  const data = load();
-  renderTotal(data);
-  renderCards(data);
-  renderCharts(data);
-  renderPension(data);
-  renderStocks(data);
-  const ts = localStorage.getItem(KEY+'_ts');
-  document.getElementById('lastUpdated').textContent = ts ? new Date(ts).toLocaleString('he-IL') : '—';
+  const data=load();
+  renderTotal(data); renderCards(data); renderCharts(data);
+  renderPension(data); renderStocks(data);
+  const ts=localStorage.getItem(KEY+'_ts');
+  document.getElementById('lastUpdated').textContent=ts?new Date(ts).toLocaleString('he-IL'):'—';
 }
 
-const fmt  = n => (n||n===0) ? '₪'+Math.round(n).toLocaleString('he-IL') : '₪—';
-const fmtS = n => n != null ? '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
-
-function calcStocks(stocks) {
-  return (stocks||[]).reduce((s,st)=>s+(st.currentPrice||st.buyPrice)*st.qty, 0);
-}
+const fmt  = n=>(n||n===0)?'₪'+Math.round(n).toLocaleString('he-IL'):'₪—';
+const fmtS = n=>n!=null?'$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
+const calcStocks = stocks=>(stocks||[]).reduce((s,st)=>s+(st.currentPrice||st.buyPrice)*st.qty,0);
 
 function renderTotal(data) {
   let total=0, prev=0, hasPrev=false;
-  const breakdown = [];
-
-  MAIN_TYPES.forEach(type => {
-    const latest = latestOf(data.entries, type);
-    const p = prevOf(data.entries, type);
-    const val = latest ? latest.amount : 0;
-    total += val;
-    if (p) { prev += p.amount; hasPrev = true; }
-    breakdown.push({ val, meta: TYPES[type] });
+  const breakdown=[];
+  Object.entries(MAIN_TYPES).forEach(([type,meta])=>{
+    const latest=latestOf(data.entries,type);
+    const p=prevOf(data.entries,type);
+    const val=latest?latest.amount:0;
+    total+=val;
+    if(p){prev+=p.amount;hasPrev=true;}
+    breakdown.push({val,meta});
   });
+  const sv=calcStocks(data.stocks);
+  total+=sv;
+  breakdown.push({val:sv,meta:{color:'#f59e0b',label:'מניות'}});
 
-  const stocksVal = calcStocks(data.stocks);
-  total += stocksVal;
-  breakdown.push({ val: stocksVal, meta: { cls:'stocks', color:'#f59e0b', label:'מניות' } });
-
-  document.getElementById('totalAmt').textContent = fmt(total);
-
-  const badge = document.getElementById('totalBadge');
-  if (hasPrev && prev > 0) {
-    const diff = total - prev;
-    const pct = ((diff/prev)*100).toFixed(1);
-    badge.textContent = (diff>=0?'▲ +':'▼ ') + fmt(Math.abs(diff)) + ' ('+pct+'%)';
-    badge.className = 'total-badge '+(diff>=0?'badge-up':'badge-down');
+  document.getElementById('totalAmt').textContent=fmt(total);
+  const badge=document.getElementById('totalBadge');
+  if(hasPrev&&prev>0){
+    const diff=total-prev, pct=((diff/prev)*100).toFixed(1);
+    badge.textContent=(diff>=0?'▲ +':'▼ ')+fmt(Math.abs(diff))+' ('+pct+'%)';
+    badge.className='total-badge '+(diff>=0?'badge-up':'badge-down');
   } else {
-    badge.textContent = total > 0 ? 'נתונים ראשונים' : 'הוסף נתונים';
-    badge.className = 'total-badge badge-neu';
+    badge.textContent=total>0?'נתונים ראשונים':'הוסף נתונים';
+    badge.className='total-badge badge-neu';
   }
+  document.getElementById('totalBreakdown').innerHTML=breakdown.map(b=>
+    `<div class="breakdown-item"><div class="breakdown-val" style="color:${b.meta.color}">${fmt(b.val)}</div><div class="breakdown-lbl">${b.meta.label}</div></div>`
+  ).join('');
+}
 
-  document.getElementById('totalBreakdown').innerHTML = breakdown.map(b =>
-    `<div class="breakdown-item">
-      <div class="breakdown-val" style="color:${b.meta.color}">${fmt(b.val)}</div>
-      <div class="breakdown-lbl">${b.meta.label}</div>
-    </div>`).join('');
+function makeCard(type, meta, data) {
+  const latest=latestOf(data.entries,type);
+  const prev=prevOf(data.entries,type);
+  const val=latest?latest.amount:0;
+  const diff=prev?val-prev.amount:null;
+  const pct=(diff!==null&&prev.amount>0)?((diff/prev.amount)*100).toFixed(1):null;
+  const sorted=data.entries.filter(e=>e.type===type).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const cid='spark_'+type.replace(/\s/g,'_');
+  let changeHtml='<span class="neu">—</span>';
+  if(diff!==null) changeHtml=`<span class="${diff>=0?'pos':'neg'}">${diff>=0?'▲ +':'▼ '}${fmt(Math.abs(diff))} (${Math.abs(pct)}%)</span>`;
+  const card=document.createElement('div');
+  card.className=`inv-card card-${meta.cls}`;
+  card.innerHTML=`
+    <div class="card-top"><div><div class="card-name">${meta.label}</div><div style="font-size:0.72rem;color:var(--faint);margin-top:1px;">${meta.sub}</div></div><div class="card-dot dot-${meta.cls}"></div></div>
+    <div class="card-amount">${fmt(val)}</div>
+    <div class="card-change">${changeHtml}</div>
+    ${sorted.length>1?`<div class="card-sparkline"><canvas id="${cid}"></canvas></div>`:''}
+    <div class="card-actions">
+      <button class="btn btn-ghost btn-sm" onclick="openAdd('${type}')">+ עדכן</button>
+      ${latest?`<button class="btn btn-danger btn-sm" onclick="deleteLast('${type}')">מחק אחרון</button>`:''}
+    </div>`;
+  if(sorted.length>1){
+    setTimeout(()=>{
+      const ctx=document.getElementById(cid); if(!ctx)return;
+      new Chart(ctx,{type:'line',data:{labels:sorted.map(e=>e.date),datasets:[{data:sorted.map(e=>e.amount),borderColor:meta.color,backgroundColor:meta.color+'18',fill:true,tension:0.4,pointRadius:0,borderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}},animation:false}});
+    },30);
+  }
+  return card;
 }
 
 function renderCards(data) {
-  const grid = document.getElementById('cardsGrid');
-  grid.innerHTML = '';
-  MAIN_TYPES.forEach(type => {
-    const meta = TYPES[type];
-    const latest = latestOf(data.entries, type);
-    const prev = prevOf(data.entries, type);
-    const val = latest ? latest.amount : 0;
-    const diff = prev ? val - prev.amount : null;
-    const pct = (diff !== null && prev.amount > 0) ? ((diff/prev.amount)*100).toFixed(1) : null;
-    const sorted = data.entries.filter(e=>e.type===type).sort((a,b)=>new Date(a.date)-new Date(b.date));
-    const cid = 'spark_'+type.replace(/\s/g,'_');
-
-    let changeHtml = '<span class="neu">—</span>';
-    if (diff !== null) changeHtml = `<span class="${diff>=0?'pos':'neg'}">${diff>=0?'▲ +':'▼ '}${fmt(Math.abs(diff))} (${Math.abs(pct)}%)</span>`;
-
-    const card = document.createElement('div');
-    card.className = `inv-card card-${meta.cls}`;
-    card.innerHTML = `
-      <div class="card-top">
-        <div><div class="card-name">${meta.label}</div><div style="font-size:0.72rem;color:var(--faint);margin-top:1px;">${meta.sub}</div></div>
-        <div class="card-dot dot-${meta.cls}"></div>
-      </div>
-      <div class="card-amount">${fmt(val)}</div>
-      <div class="card-change">${changeHtml}</div>
-      ${sorted.length > 1 ? `<div class="card-sparkline"><canvas id="${cid}"></canvas></div>` : ''}
-      <div class="card-actions">
-        <button class="btn btn-ghost btn-sm" onclick="openAdd('${type}')">+ עדכן</button>
-        ${latest ? `<button class="btn btn-danger btn-sm" onclick="deleteLast('${type}')">מחק אחרון</button>` : ''}
-      </div>`;
-    grid.appendChild(card);
-
-    if (sorted.length > 1) {
-      setTimeout(() => {
-        const ctx = document.getElementById(cid);
-        if (!ctx) return;
-        new Chart(ctx, {
-          type:'line',
-          data:{ labels:sorted.map(e=>e.date), datasets:[{ data:sorted.map(e=>e.amount), borderColor:meta.color, backgroundColor:meta.color+'18', fill:true, tension:0.4, pointRadius:0, borderWidth:1.5 }] },
-          options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{enabled:false}}, scales:{x:{display:false},y:{display:false}}, animation:false }
-        });
-      }, 30);
-    }
-  });
+  const mg=document.getElementById('cardsGrid'); mg.innerHTML='';
+  Object.entries(MAIN_TYPES).forEach(([t,m])=>mg.appendChild(makeCard(t,m,data)));
+  const sg=document.getElementById('sideGrid'); sg.innerHTML='';
+  Object.entries(SIDE_TYPES).forEach(([t,m])=>sg.appendChild(makeCard(t,m,data)));
 }
 
-function filterPeriod(entries, p) {
-  if (p==='all') return entries;
-  const now = new Date();
-  const months = p==='year'?12:p==='6m'?6:3;
-  const cut = new Date(now.getFullYear(), now.getMonth()-months, now.getDate());
+function filterPeriod(entries,p){
+  if(p==='all')return entries;
+  const now=new Date(), months=p==='year'?12:p==='6m'?6:3;
+  const cut=new Date(now.getFullYear(),now.getMonth()-months,now.getDate());
   return entries.filter(e=>new Date(e.date)>=cut);
 }
 
+const chartOptions = (color) => ({
+  responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'₪'+c.parsed.y.toLocaleString('he-IL')},backgroundColor:'#1f1f28',titleColor:'#f0f0f5',bodyColor:'#888899',borderColor:'rgba(255,255,255,0.07)',borderWidth:1}},
+  scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#888899',font:{family:'Rubik',size:11}}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#888899',font:{family:'Rubik',size:11},callback:v=>'₪'+(v/1000).toFixed(0)+'K'}}}
+});
+
 function renderCharts(data) {
-  const grid = document.getElementById('chartsGrid');
-  grid.innerHTML = '';
-  Object.values(chartObjs).forEach(c=>{ try{c.destroy()}catch{} });
-  chartObjs = {};
-
-  MAIN_TYPES.forEach(type => {
-    const meta = TYPES[type];
-    const all = data.entries.filter(e=>e.type===type).sort((a,b)=>new Date(a.date)-new Date(b.date));
-    const filtered = filterPeriod(all, period);
-    const id = 'chart_'+type.replace(/\s/g,'_');
-
-    const card = document.createElement('div');
-    card.className = 'chart-card';
-    if (filtered.length === 0) {
-      card.innerHTML = `<div class="chart-card-title"><span style="color:${meta.color}">●</span> ${meta.label}</div><div class="empty-cell">אין נתונים בתקופה זו</div>`;
+  const grid=document.getElementById('chartsGrid'); grid.innerHTML='';
+  Object.values(chartObjs).forEach(c=>{try{c.destroy()}catch{}});
+  chartObjs={};
+  Object.entries(CHART_TYPES).forEach(([type,meta])=>{
+    const all=data.entries.filter(e=>e.type===type).sort((a,b)=>new Date(a.date)-new Date(b.date));
+    const filtered=filterPeriod(all,period);
+    const id='chart_'+type.replace(/\s/g,'_');
+    const card=document.createElement('div'); card.className='chart-card';
+    if(!filtered.length){
+      card.innerHTML=`<div class="chart-card-title"><span style="color:${meta.color}">●</span> ${meta.label}</div><div class="empty-cell">אין נתונים בתקופה זו</div>`;
     } else {
-      card.innerHTML = `<div class="chart-card-title"><span style="color:${meta.color}">●</span> ${meta.label} <span style="font-weight:400;color:var(--faint);margin-right:auto;font-size:0.72rem;">${filtered.length} נקודות</span></div><div class="chart-container"><canvas id="${id}"></canvas></div>`;
+      card.innerHTML=`<div class="chart-card-title"><span style="color:${meta.color}">●</span> ${meta.label} <span style="font-weight:400;color:var(--faint);margin-right:auto;font-size:0.72rem;">${filtered.length} נקודות</span></div><div class="chart-container"><canvas id="${id}"></canvas></div>`;
     }
     grid.appendChild(card);
-
-    if (filtered.length > 0) {
-      setTimeout(() => {
-        const ctx = document.getElementById(id);
-        if (!ctx) return;
-        chartObjs[type] = new Chart(ctx, {
-          type:'line',
-          data:{
-            labels: filtered.map(e=>new Date(e.date).toLocaleDateString('he-IL',{month:'short',year:'2-digit'})),
-            datasets:[{ label:meta.label, data:filtered.map(e=>e.amount), borderColor:meta.color, backgroundColor:meta.color+'14', fill:true, tension:0.4, pointRadius:3, pointHoverRadius:6, pointBackgroundColor:meta.color, borderWidth:2 }]
-          },
-          options:{
-            responsive:true, maintainAspectRatio:false,
-            plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'₪'+c.parsed.y.toLocaleString('he-IL')},backgroundColor:'#1f1f28',titleColor:'#f0f0f5',bodyColor:'#888899',borderColor:'rgba(255,255,255,0.07)',borderWidth:1}},
-            scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#888899',font:{family:'Rubik',size:11}}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#888899',font:{family:'Rubik',size:11},callback:v=>'₪'+(v/1000).toFixed(0)+'K'}}}
-          }
-        });
-      }, 30);
+    if(filtered.length>0){
+      setTimeout(()=>{
+        const ctx=document.getElementById(id); if(!ctx)return;
+        chartObjs[type]=new Chart(ctx,{type:'line',data:{labels:filtered.map(e=>new Date(e.date).toLocaleDateString('he-IL',{month:'short',year:'2-digit'})),datasets:[{data:filtered.map(e=>e.amount),borderColor:meta.color,backgroundColor:meta.color+'14',fill:true,tension:0.4,pointRadius:3,pointHoverRadius:6,pointBackgroundColor:meta.color,borderWidth:2}]},options:chartOptions(meta.color)});
+      },30);
     }
   });
 }
 
-let pensionChart = null;
 function renderPension(data) {
-  const latest = latestOf(data.entries, PENSION);
-  const prev = prevOf(data.entries, PENSION);
-  document.getElementById('pensionAmt').textContent = latest ? fmt(latest.amount) : '₪—';
-  if (latest && prev) {
-    const diff = latest.amount - prev.amount;
-    const pct = ((diff/prev.amount)*100).toFixed(1);
-    document.getElementById('pensionNote').innerHTML = `<span class="${diff>=0?'pos':'neg'}">${diff>=0?'▲ +':'▼ '}${fmt(Math.abs(diff))} (${Math.abs(pct)}%)</span>`;
-  } else {
-    document.getElementById('pensionNote').textContent = latest ? new Date(latest.date).toLocaleDateString('he-IL') : 'אין נתונים';
-  }
-  const all = data.entries.filter(e=>e.type===PENSION).sort((a,b)=>new Date(a.date)-new Date(b.date));
-  if (pensionChart) { try{pensionChart.destroy()}catch{} }
-  if (all.length > 0) {
-    setTimeout(() => {
-      const ctx = document.getElementById('pensionChart');
-      if (!ctx) return;
-      pensionChart = new Chart(ctx, {
-        type:'line',
-        data:{
-          labels: all.map(e=>new Date(e.date).toLocaleDateString('he-IL',{month:'short',year:'2-digit'})),
-          datasets:[{ data:all.map(e=>e.amount), borderColor:'#64748b', backgroundColor:'#64748b14', fill:true, tension:0.4, pointRadius:3, pointHoverRadius:6, pointBackgroundColor:'#64748b', borderWidth:2 }]
-        },
-        options:{
-          responsive:true, maintainAspectRatio:false,
-          plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'₪'+c.parsed.y.toLocaleString('he-IL')},backgroundColor:'#1f1f28',titleColor:'#f0f0f5',bodyColor:'#888899',borderColor:'rgba(255,255,255,0.07)',borderWidth:1}},
-          scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#888899',font:{family:'Rubik',size:11}}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#888899',font:{family:'Rubik',size:11},callback:v=>'₪'+(v/1000).toFixed(0)+'K'}}}
-        }
-      });
-    }, 30);
-  }
+  Object.entries(PENSION_TYPES).forEach(([type,meta])=>{
+    const latest=latestOf(data.entries,type);
+    const prev=prevOf(data.entries,type);
+    document.getElementById(meta.amtId).textContent=latest?fmt(latest.amount):'₪—';
+    if(latest&&prev){
+      const diff=latest.amount-prev.amount, pct=((diff/prev.amount)*100).toFixed(1);
+      document.getElementById(meta.noteId).innerHTML=`<span class="${diff>=0?'pos':'neg'}">${diff>=0?'▲ +':'▼ '}${fmt(Math.abs(diff))} (${Math.abs(pct)}%)</span>`;
+    } else {
+      document.getElementById(meta.noteId).textContent=latest?new Date(latest.date).toLocaleDateString('he-IL'):'אין נתונים';
+    }
+    const all=data.entries.filter(e=>e.type===type).sort((a,b)=>new Date(a.date)-new Date(b.date));
+    if(pensionCharts[type]){try{pensionCharts[type].destroy()}catch{}}
+    if(all.length>0){
+      setTimeout(()=>{
+        const ctx=document.getElementById(meta.chartId); if(!ctx)return;
+        pensionCharts[type]=new Chart(ctx,{type:'line',data:{labels:all.map(e=>new Date(e.date).toLocaleDateString('he-IL',{month:'short',year:'2-digit'})),datasets:[{data:all.map(e=>e.amount),borderColor:meta.color,backgroundColor:meta.color+'14',fill:true,tension:0.4,pointRadius:3,pointHoverRadius:6,pointBackgroundColor:meta.color,borderWidth:2}]},options:chartOptions(meta.color)});
+      },30);
+    }
+  });
 }
 
 function renderStocks(data) {
-  const body = document.getElementById('stocksBody');
-  if (!data.stocks || data.stocks.length === 0) {
-    body.innerHTML = '<div class="empty-cell">עדיין לא הוספת מניות</div>';
-    return;
-  }
-  const rows = data.stocks.map((s,i) => {
-    const cur = s.currentPrice || s.buyPrice;
-    const val = cur * s.qty;
-    const cost = s.buyPrice * s.qty;
-    const pnl = val - cost;
-    const pct = ((pnl/cost)*100).toFixed(1);
-    return `<tr>
-      <td><span class="ticker">${s.ticker}</span></td>
-      <td>${Number(s.qty).toLocaleString()}</td>
-      <td>${fmtS(s.buyPrice)}</td>
-      <td>${s.currentPrice?fmtS(s.currentPrice):'<span style="color:var(--faint)">—</span>'} <button class="refresh-btn" onclick="fetchPrice(${i})">↻</button></td>
-      <td>${fmt(val)}</td>
-      <td class="${pnl>=0?'pos':'neg'}">${pnl>=0?'+':''}${fmt(pnl)} (${pct}%)</td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteStock(${i})">✕</button></td>
-    </tr>`;
-  }).join('');
-  body.innerHTML = `<table><thead><tr><th>טיקר</th><th>כמות</th><th>מחיר קנייה</th><th>מחיר נוכחי</th><th>שווי (₪)</th><th>רווח/הפסד</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+  const body=document.getElementById('stocksBody');
+  if(!data.stocks||!data.stocks.length){body.innerHTML='<div class="empty-cell">עדיין לא הוספת מניות</div>';return;}
+  body.innerHTML=`<table><thead><tr><th>טיקר</th><th>כמות</th><th>מחיר קנייה</th><th>מחיר נוכחי</th><th>שווי (₪)</th><th>רווח/הפסד</th><th></th></tr></thead><tbody>${
+    data.stocks.map((s,i)=>{
+      const cur=s.currentPrice||s.buyPrice, val=cur*s.qty, cost=s.buyPrice*s.qty, pnl=val-cost, pct=((pnl/cost)*100).toFixed(1);
+      return `<tr><td><span class="ticker">${s.ticker}</span></td><td>${Number(s.qty).toLocaleString()}</td><td>${fmtS(s.buyPrice)}</td><td>${s.currentPrice?fmtS(s.currentPrice):'<span style="color:var(--faint)">—</span>'} <button class="refresh-btn" onclick="fetchPrice(${i})">↻</button></td><td>${fmt(val)}</td><td class="${pnl>=0?'pos':'neg'}">${pnl>=0?'+':''}${fmt(pnl)} (${pct}%)</td><td><button class="btn btn-danger btn-sm" onclick="deleteStock(${i})">✕</button></td></tr>`;
+    }).join('')
+  }</tbody></table>`;
 }
 
-// ─── MODALS ───────────────────────────────────
-function openAdd(type) {
-  document.getElementById('addDate').value = new Date().toISOString().split('T')[0];
-  document.getElementById('addAmount').value = '';
-  document.getElementById('addNote').value = '';
-  document.getElementById('csvArea').style.display = 'none';
-  if (type) document.getElementById('addType').value = type;
+// ─── MODALS ───
+function openAdd(type){
+  document.getElementById('addDate').value=new Date().toISOString().split('T')[0];
+  document.getElementById('addAmount').value='';
+  document.getElementById('addNote').value='';
+  document.getElementById('csvArea').style.display='none';
+  if(type) document.getElementById('addType').value=type;
   document.getElementById('addOverlay').classList.add('open');
 }
-function openAddStock() {
-  ['sTicker','sQty','sBuy'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('stockOverlay').classList.add('open');
-}
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-function toggleCSV() { const el=document.getElementById('csvArea'); el.style.display=el.style.display==='none'?'block':'none'; }
+function openAddStock(){['sTicker','sQty','sBuy'].forEach(id=>document.getElementById(id).value='');document.getElementById('stockOverlay').classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function toggleCSV(){const el=document.getElementById('csvArea');el.style.display=el.style.display==='none'?'block':'none';}
 
-function showConfirm(icon, title, msg, onOk, danger) {
-  document.getElementById('cIcon').textContent = icon;
-  document.getElementById('cTitle').textContent = title;
-  document.getElementById('cMsg').textContent = msg;
-  const btn = document.getElementById('cBtn');
-  btn.className = 'btn '+(danger?'btn-danger':'btn-primary');
-  btn.onclick = ()=>{ closeModal('confirmOverlay'); onOk(); };
+function showConfirm(icon,title,msg,onOk,danger){
+  document.getElementById('cIcon').textContent=icon;
+  document.getElementById('cTitle').textContent=title;
+  document.getElementById('cMsg').textContent=msg;
+  const btn=document.getElementById('cBtn');
+  btn.className='btn '+(danger?'btn-danger':'btn-primary');
+  btn.onclick=()=>{closeModal('confirmOverlay');onOk();};
   document.getElementById('confirmOverlay').classList.add('open');
 }
 
-// ─── ACTIONS ──────────────────────────────────
-function submitAdd() {
-  const type = document.getElementById('addType').value;
-  const date = document.getElementById('addDate').value;
-  const amount = parseFloat(document.getElementById('addAmount').value);
-  const note = document.getElementById('addNote').value;
-  if (!date || isNaN(amount) || amount<=0) { toast('נא למלא תאריך וסכום תקין', true); return; }
+// ─── ACTIONS ───
+function submitAdd(){
+  const type=document.getElementById('addType').value, date=document.getElementById('addDate').value;
+  const amount=parseFloat(document.getElementById('addAmount').value), note=document.getElementById('addNote').value;
+  if(!date||isNaN(amount)||amount<=0){toast('נא למלא תאריך וסכום תקין',true);return;}
   showConfirm('💾','שמירת עדכון',`שמור עדכון ל${type}: ${fmt(amount)} (${new Date(date).toLocaleDateString('he-IL')})?`,()=>{
-    const data = load();
-    data.entries.push({type,date,amount,note,id:Date.now()});
-    closeModal('addOverlay');
-    save(data);
+    const data=load(); data.entries.push({type,date,amount,note,id:Date.now()}); closeModal('addOverlay'); save(data);
   });
 }
-
-function submitStock() {
-  const ticker = document.getElementById('sTicker').value.trim().toUpperCase();
-  const qty = parseFloat(document.getElementById('sQty').value);
-  const buyPrice = parseFloat(document.getElementById('sBuy').value);
-  if (!ticker||isNaN(qty)||qty<=0||isNaN(buyPrice)||buyPrice<=0) { toast('נא למלא את כל השדות', true); return; }
+function submitStock(){
+  const ticker=document.getElementById('sTicker').value.trim().toUpperCase();
+  const qty=parseFloat(document.getElementById('sQty').value), buyPrice=parseFloat(document.getElementById('sBuy').value);
+  if(!ticker||isNaN(qty)||qty<=0||isNaN(buyPrice)||buyPrice<=0){toast('נא למלא את כל השדות',true);return;}
   showConfirm('📈','הוספת מניה',`הוסף ${qty} מניות של ${ticker} במחיר $${buyPrice}?`,()=>{
-    const data = load();
-    data.stocks.push({ticker,qty,buyPrice,currentPrice:null,id:Date.now()});
-    closeModal('stockOverlay');
-    save(data);
+    const data=load(); data.stocks.push({ticker,qty,buyPrice,currentPrice:null,id:Date.now()}); closeModal('stockOverlay'); save(data);
   });
 }
-
-function deleteLast(type) {
-  const data = load();
-  const sorted = data.entries.filter(e=>e.type===type).sort((a,b)=>new Date(b.date)-new Date(a.date));
-  if (!sorted.length) return;
-  const last = sorted[0];
+function deleteLast(type){
+  const data=load();
+  const sorted=data.entries.filter(e=>e.type===type).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(!sorted.length)return;
+  const last=sorted[0];
   showConfirm('🗑','מחיקת נתון',`מחק ${fmt(last.amount)} מ-${new Date(last.date).toLocaleDateString('he-IL')}?`,()=>{
-    data.entries = data.entries.filter(e=>e.id!==last.id);
-    save(data);
-  }, true);
+    data.entries=data.entries.filter(e=>e.id!==last.id); save(data);
+  },true);
+}
+function deleteStock(i){
+  const data=load(); const s=data.stocks[i];
+  showConfirm('🗑','מחיקת מניה',`מחק ${s.ticker} מהתיק?`,()=>{data.stocks.splice(i,1);save(data);},true);
 }
 
-function deleteStock(i) {
-  const data = load();
-  const s = data.stocks[i];
-  showConfirm('🗑','מחיקת מניה',`מחק ${s.ticker} מהתיק?`,()=>{
-    data.stocks.splice(i,1);
-    save(data);
-  }, true);
+// ─── STOCK FETCH ───
+async function fetchPrice(i){
+  const data=load(), s=data.stocks[i]; toast(`מושך מחיר ${s.ticker}...`);
+  try{
+    const url=`https://query1.finance.yahoo.com/v8/finance/chart/${s.ticker}?interval=1d&range=1d`;
+    const res=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+    const j=await res.json(), parsed=JSON.parse(j.contents);
+    const price=parsed?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if(price){data.stocks[i].currentPrice=price;data.stocks[i].lastFetched=new Date().toISOString();save(data);toast(`${s.ticker}: $${price.toFixed(2)} ✅`);}
+    else toast(`לא נמצא מחיר ל-${s.ticker}`,true);
+  }catch{toast(`שגיאה בשליפת ${s.ticker}`,true);}
 }
 
-// ─── STOCK FETCH ──────────────────────────────
-async function fetchPrice(i) {
-  const data = load();
-  const s = data.stocks[i];
-  toast(`מושך מחיר ${s.ticker}...`);
-  try {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${s.ticker}?interval=1d&range=1d`;
-    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-    const j = await res.json();
-    const parsed = JSON.parse(j.contents);
-    const price = parsed?.chart?.result?.[0]?.meta?.regularMarketPrice;
-    if (price) {
-      data.stocks[i].currentPrice = price;
-      data.stocks[i].lastFetched = new Date().toISOString();
-      save(data);
-      toast(`${s.ticker}: $${price.toFixed(2)} ✅`);
-    } else { toast(`לא נמצא מחיר ל-${s.ticker}`, true); }
-  } catch { toast(`שגיאה בשליפת ${s.ticker}`, true); }
+// ─── IMPORT / EXPORT ───
+function exportData(){showConfirm('💾','ייצוא גיבוי','ייצא את כל הנתונים לקובץ JSON?',()=>{
+  const blob=new Blob([JSON.stringify(load(),null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`investments_${new Date().toISOString().split('T')[0]}.json`; a.click(); toast('גיבוי הורד ✅');
+});}
+function triggerImport(){showConfirm('⚠️','שחזור מגיבוי','פעולה זו תחליף את כל הנתונים הקיימים. להמשיך?',()=>document.getElementById('importIn').click(),true);}
+function handleImport(e){
+  const file=e.target.files[0]; if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(!d.entries||!d.stocks)throw new Error();localStorage.setItem(KEY,JSON.stringify(d));render();toast('שוחזר בהצלחה ✅');}catch{toast('קובץ לא תקין',true);}};
+  r.readAsText(file); e.target.value='';
 }
+function handleCSV(e){toast(`קובץ "${e.target.files[0]?.name}" נטען.`);}
 
-// ─── IMPORT / EXPORT ──────────────────────────
-function exportData() {
-  showConfirm('💾','ייצוא גיבוי','ייצא את כל הנתונים לקובץ JSON?',()=>{
-    const blob = new Blob([JSON.stringify(load(),null,2)],{type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `investments_${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    toast('גיבוי הורד ✅');
-  });
-}
-function triggerImport() {
-  showConfirm('⚠️','שחזור מגיבוי','פעולה זו תחליף את כל הנתונים הקיימים. להמשיך?',()=>document.getElementById('importIn').click(), true);
-}
-function handleImport(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const r = new FileReader();
-  r.onload = ev => {
-    try {
-      const d = JSON.parse(ev.target.result);
-      if (!d.entries||!d.stocks) throw new Error();
-      localStorage.setItem(KEY, JSON.stringify(d));
-      render(); toast('שוחזר בהצלחה ✅');
-    } catch { toast('קובץ לא תקין', true); }
-  };
-  r.readAsText(file);
-  e.target.value = '';
-}
+function setPeriod(p,btn){period=p;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderCharts(load());}
 
-function handleCSV(e) {
-  toast(`קובץ "${e.target.files[0]?.name}" נטען. השתמשי בהזנה ידנית בינתיים.`);
-}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
 
-function setPeriod(p, btn) {
-  period = p;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');
-  renderCharts(load());
-}
-
-document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); }));
-
-function toast(msg, err=false) {
-  const el = document.createElement('div');
-  el.className = 'toast'+(err?' err':'');
-  el.textContent = msg;
-  document.getElementById('toasts').appendChild(el);
-  setTimeout(()=>el.remove(), 3000);
+function toast(msg,err=false){
+  const el=document.createElement('div'); el.className='toast'+(err?' err':''); el.textContent=msg;
+  document.getElementById('toasts').appendChild(el); setTimeout(()=>el.remove(),3000);
 }
 
 render();
