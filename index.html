@@ -386,10 +386,19 @@ function renderUsdRate() {
 async function fetchUsdRate() {
   toast('מושך שער דולר...');
   try {
-    const url='https://query1.finance.yahoo.com/v8/finance/chart/USDILS=X?interval=1d&range=1d';
-    const res=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-    const j=await res.json(), parsed=JSON.parse(j.contents);
-    const rate=parsed?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    const yahooUrl='https://query1.finance.yahoo.com/v8/finance/chart/USDILS=X?interval=1d&range=1d';
+    let rate = null;
+    try {
+      const res=await fetch(`https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`);
+      const parsed=await res.json();
+      rate=parsed?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    } catch {}
+    if(!rate) {
+      const res2=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`);
+      const j=await res2.json();
+      const parsed2=JSON.parse(j.contents);
+      rate=parsed2?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    }
     if(rate){ saveUsdRate(rate); toast(`שער דולר: ₪${rate.toFixed(3)} ✅`); }
     else toast('לא נמצא שער דולר',true);
   } catch { toast('שגיאה בשליפת שער דולר',true); }
@@ -611,26 +620,40 @@ function deleteStock(i){
 async function fetchPrice(i){
   const data=load(), s=data.stocks[i]; toast(`מושך מחיר ${s.ticker}...`);
   try{
-    const url=`https://query1.finance.yahoo.com/v8/finance/chart/${s.ticker}?interval=1d&range=1d`;
-    const res=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-    const j=await res.json(), parsed=JSON.parse(j.contents);
-    const price=parsed?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    // Try corsproxy.io first, fallback to allorigins
+    const yahooUrl=`https://query1.finance.yahoo.com/v8/finance/chart/${s.ticker}?interval=1d&range=1d`;
+    let price = null;
+
+    // Attempt 1: corsproxy.io
+    try {
+      const res=await fetch(`https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`);
+      const parsed=await res.json();
+      price=parsed?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    } catch {}
+
+    // Attempt 2: allorigins fallback
+    if(!price) {
+      const res2=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`);
+      const j=await res2.json();
+      const parsed2=JSON.parse(j.contents);
+      price=parsed2?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    }
+
     if(price && price > 0){
       data.stocks[i].currentPrice=price;
       data.stocks[i].lastFetched=new Date().toISOString();
       save(data); toast(`${s.ticker}: $${price.toFixed(2)} ✅`);
     } else {
-      // Stock might be delisted — prompt manual entry
-      const manual = prompt(`לא נמצא מחיר אוטומטי ל-${s.ticker} (ייתכן שהמניה הורדה מהמסחר).\nהזן מחיר ידנית בדולרים, או לחץ ביטול:`);
+      const manual = prompt(`לא נמצא מחיר אוטומטי ל-${s.ticker}.\nהזן מחיר ידנית בדולרים:`);
       if(manual && !isNaN(parseFloat(manual)) && parseFloat(manual)>0){
         data.stocks[i].currentPrice=parseFloat(manual);
         data.stocks[i].lastFetched=new Date().toISOString();
         save(data); toast(`${s.ticker}: $${parseFloat(manual).toFixed(2)} עודכן ✅`);
-      } else {
-        toast(`לא עודכן מחיר ל-${s.ticker}`,true);
       }
     }
-  }catch{ toast(`שגיאה בשליפת ${s.ticker}`,true); }
+  } catch(err) {
+    toast(`שגיאה בשליפת ${s.ticker}`,true);
+  }
 }
 
 // ─── IMPORT / EXPORT ───
