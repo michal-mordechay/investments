@@ -570,7 +570,7 @@ function showConfirm(icon,title,msg,onOk,danger){
   document.getElementById('cMsg').textContent=msg;
   const btn=document.getElementById('cBtn');
   btn.className='btn '+(danger?'btn-danger':'btn-primary');
-  btn.onclick=()=>{closeModal('confirmOverlay');onOk();};
+  btn.onclick=(e)=>{e.stopPropagation();closeModal('confirmOverlay');onOk();};
   document.getElementById('confirmOverlay').classList.add('open');
 }
 
@@ -579,8 +579,10 @@ function submitAdd(){
   const type=document.getElementById('addType').value, date=document.getElementById('addDate').value;
   const amount=parseFloat(document.getElementById('addAmount').value), note=document.getElementById('addNote').value;
   if(!date||isNaN(amount)||amount<=0){toast('נא למלא תאריך וסכום תקין',true);return;}
+  // Capture values immediately before closing modal
+  const entry={type,date,amount,note,id:Date.now()};
   showConfirm('💾','שמירת עדכון',`שמור עדכון ל${type}: ${fmt(amount)} (${new Date(date).toLocaleDateString('he-IL')})?`,()=>{
-    const data=load(); data.entries.push({type,date,amount,note,id:Date.now()}); closeModal('addOverlay'); save(data);
+    const data=load(); data.entries.push(entry); closeModal('addOverlay'); save(data);
   });
 }
 function submitStock(){
@@ -613,9 +615,22 @@ async function fetchPrice(i){
     const res=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
     const j=await res.json(), parsed=JSON.parse(j.contents);
     const price=parsed?.chart?.result?.[0]?.meta?.regularMarketPrice;
-    if(price){data.stocks[i].currentPrice=price;data.stocks[i].lastFetched=new Date().toISOString();save(data);toast(`${s.ticker}: $${price.toFixed(2)} ✅`);}
-    else toast(`לא נמצא מחיר ל-${s.ticker}`,true);
-  }catch{toast(`שגיאה בשליפת ${s.ticker}`,true);}
+    if(price && price > 0){
+      data.stocks[i].currentPrice=price;
+      data.stocks[i].lastFetched=new Date().toISOString();
+      save(data); toast(`${s.ticker}: $${price.toFixed(2)} ✅`);
+    } else {
+      // Stock might be delisted — prompt manual entry
+      const manual = prompt(`לא נמצא מחיר אוטומטי ל-${s.ticker} (ייתכן שהמניה הורדה מהמסחר).\nהזן מחיר ידנית בדולרים, או לחץ ביטול:`);
+      if(manual && !isNaN(parseFloat(manual)) && parseFloat(manual)>0){
+        data.stocks[i].currentPrice=parseFloat(manual);
+        data.stocks[i].lastFetched=new Date().toISOString();
+        save(data); toast(`${s.ticker}: $${parseFloat(manual).toFixed(2)} עודכן ✅`);
+      } else {
+        toast(`לא עודכן מחיר ל-${s.ticker}`,true);
+      }
+    }
+  }catch{ toast(`שגיאה בשליפת ${s.ticker}`,true); }
 }
 
 // ─── IMPORT / EXPORT ───
@@ -636,6 +651,7 @@ function handleCSV(e){toast(`קובץ "${e.target.files[0]?.name}" נטען.`);}
 function setPeriod(p,btn){period=p;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderCharts(load());}
 
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>e.stopPropagation()));
 
 function toast(msg,err=false){
   const el=document.createElement('div'); el.className='toast'+(err?' err':''); el.textContent=msg;
