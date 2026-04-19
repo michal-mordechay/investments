@@ -24,14 +24,14 @@ body{font-family:'Rubik',sans-serif;background:var(--bg);color:var(--text);min-h
 /* HEADER */
 .header{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
 .logo{font-size:1.15rem;font-weight:600;letter-spacing:-0.3px;}
-.logo span{color:var(--c-hashtalm);}
+.logo span{color:var(--c-hashtalm-m);}
 .header-sub{color:var(--muted);font-size:0.78rem;margin-top:2px;}
 .header-actions{display:flex;gap:8px;}
 
 /* BUTTONS */
 .btn{padding:8px 16px;border:none;border-radius:8px;font-family:'Rubik',sans-serif;font-size:0.8rem;font-weight:500;cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:5px;}
 .btn:hover{filter:brightness(1.15);}
-.btn-primary{background:var(--c-hashtalm);color:#0f0f13;}
+.btn-primary{background:var(--c-hashtalm-m);color:#0f0f13;}
 .btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
 .btn-danger{background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.25);}
 .btn-sm{padding:5px 11px;font-size:0.75rem;}
@@ -187,7 +187,7 @@ tr:last-child td{border-bottom:none;}
 .alloc-color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 .alloc-input-label{font-size:0.82rem;color:var(--muted);flex:1;}
 .alloc-input-pct{width:70px;padding:6px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;font-family:'Rubik',sans-serif;font-size:0.85rem;color:var(--text);outline:none;text-align:center;}
-.alloc-input-pct:focus{border-color:var(--c-hashtalm);}
+.alloc-input-pct:focus{border-color:var(--c-hashtalm-m);}
 .alloc-sum{font-size:0.78rem;margin-top:4px;text-align:left;}
 
 /* MODALS */
@@ -210,7 +210,7 @@ tr:last-child td{border-bottom:none;}
 .confirm-btns{display:flex;gap:10px;justify-content:center;}
 .warn-box{background:rgba(251,146,60,0.08);border:1px solid rgba(251,146,60,0.2);border-radius:8px;padding:10px 14px;font-size:0.78rem;color:#fb923c;margin-bottom:16px;line-height:1.5;}
 .upload-area{border:1px dashed var(--faint);border-radius:8px;padding:18px;text-align:center;cursor:pointer;color:var(--muted);font-size:0.82rem;transition:border-color 0.15s;margin-bottom:14px;}
-.upload-area:hover{border-color:var(--c-hashtalm);}
+.upload-area:hover{border-color:var(--c-hashtalm-m);}
 .mode-tabs{display:flex;gap:4px;margin-bottom:16px;}
 .mode-tab{flex:1;padding:8px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--muted);font-family:'Rubik',sans-serif;font-size:0.8rem;cursor:pointer;transition:all 0.15s;text-align:center;}
 .mode-tab.active{background:var(--surface2);color:var(--text);border-color:rgba(255,255,255,0.15);}
@@ -244,7 +244,7 @@ tr:last-child td{border-bottom:none;}
 
   <div class="total-bar">
     <div>
-      <div class="total-label">סה״כ תיק — ללא פנסיה, ללא אליענה ואוריאל</div>
+      <div class="total-label">סה״כ תיק — גמל + השתלמות + בנק + מניות</div>
       <div style="display:flex;align-items:baseline;gap:12px;margin-top:4px;">
         <div class="total-amount" id="totalAmt">₪—</div>
         <div class="total-badge badge-neu" id="totalBadge">—</div>
@@ -590,16 +590,24 @@ function render(){
 }
 
 function renderTotal(data){
-  // סה"כ תיק = מיכל בלבד (גמל + השתלמות + בנק) + מניות
-  const TOTAL_TYPES=['קופת גמל מיכל','קרן השתלמות מיכל','חיסכון בבנק'];
+  // סה"כ תיק = גמל (מיכל+דור) + השתלמות (מיכל+דור) + בנק + מניות
+  const COMBINED=[
+    {label:'קופות גמל',  color:'#5b8dee', types:['קופת גמל מיכל','קופת גמל דור']},
+    {label:'קרן השתלמות',color:'#10d9a0', types:['קרן השתלמות מיכל','קרן השתלמות דור']},
+    {label:'חיסכון בבנק',color:'#f59e0b', types:['חיסכון בבנק']},
+  ];
   let total=0,prev=0,hasPrev=false;
   const breakdown=[];
-  TOTAL_TYPES.forEach(type=>{
-    const meta=MAIN_TYPES[type];
-    const latest=latestOf(data.entries,type);const p=prevOf(data.entries,type);
-    const val=latest?latest.amount:0;total+=val;
-    if(p){prev+=p.amount;hasPrev=true;}
-    breakdown.push({val,meta});
+  COMBINED.forEach(({label,color,types})=>{
+    let val=0,pval=0,hp=false;
+    types.forEach(t=>{
+      const latest=latestOf(data.entries,t);
+      const p=prevOf(data.entries,t);
+      val+=latest?latest.amount:0;
+      if(p){pval+=p.amount;hp=true;}
+    });
+    total+=val;prev+=pval;if(hp)hasPrev=true;
+    breakdown.push({val,meta:{color,label}});
   });
   const sv=calcStocks(data.stocks);total+=sv;
   breakdown.push({val:sv,meta:{color:'#f59e0b',label:'מניות'}});
@@ -642,6 +650,21 @@ function makeCard(type,meta,data){
 function renderCards(data){
   const mg=document.getElementById('cardsGrid');mg.innerHTML='';
   Object.entries(MAIN_TYPES).forEach(([t,m])=>mg.appendChild(makeCard(t,m,data)));
+  // Add stocks summary card
+  const {rate}=getUsdRate();
+  const sv=calcStocks(data.stocks);
+  const stockCard=document.createElement('div');
+  stockCard.className='inv-card card-stocks';
+  stockCard.style.cursor='default';
+  const tickers=data.stocks&&data.stocks.length?data.stocks.map(s=>s.ticker).join(', '):'אין מניות';
+  stockCard.innerHTML=`
+    <div class="card-top">
+      <div><div class="card-name">מניות</div><div style="font-size:0.72rem;color:var(--faint);margin-top:1px;">${tickers}</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="openAddStock()" style="font-size:0.7rem;">+ הוסף</button>
+    </div>
+    <div class="card-amount">${sv>0?fmt(sv):'₪—'}</div>
+    <div class="card-change" style="font-size:0.72rem;color:var(--muted);">${rate?'שער: ₪'+Number(rate).toFixed(3):'⚠️ עדכן שער $'}</div>`;
+  mg.appendChild(stockCard);
   // Group side types by kid
   const sg=document.getElementById('sideGrid');sg.innerHTML='';
   const kids={};
@@ -763,17 +786,30 @@ function buildDetailPage(type){
       </div>`).join('');
   } else { allocWrap.style.display='none'; }
 
-  // Sub-accounts info for gamal michal
+  // Sub-accounts info
   const subWrap=document.getElementById('detailSubAccounts');
   subWrap.innerHTML='';
   if(type==='קופת גמל מיכל'){
-    const report=reports[type]||null;
     subWrap.innerHTML=`
       <div class="sub-accounts" style="margin-bottom:20px;">
         <div class="sub-header">3 קופות — הראל</div>
         <div class="sub-row"><div><div class="sub-name">161942283</div><div class="sub-meta">כללי</div></div><div style="text-align:left;"><div class="sub-amount" style="color:var(--c-gamal-m)">₪161,434</div><div class="sub-change neu">31.12.2025</div></div></div>
         <div class="sub-row"><div><div class="sub-name">162423954</div><div class="sub-meta">כללי + מניות</div></div><div style="text-align:left;"><div class="sub-amount" style="color:var(--c-gamal-m)">₪110,686</div><div class="sub-change neu">31.12.2025</div></div></div>
         <div class="sub-row"><div><div class="sub-name">162424137</div><div class="sub-meta">כללי + מניות</div></div><div style="text-align:left;"><div class="sub-amount" style="color:var(--c-gamal-m)">₪199,297</div><div class="sub-change neu">31.12.2025</div></div></div>
+      </div>`;
+  } else if(type==='קרן השתלמות דור'){
+    subWrap.innerHTML=`
+      <div class="sub-accounts" style="margin-bottom:20px;">
+        <div class="sub-header">2 קרנות — הראל והפניקס</div>
+        <div class="sub-row">
+          <div><div class="sub-name">הראל — בן בטחון</div><div class="sub-meta">161002025 — לא פעילה</div></div>
+          <div style="text-align:left;"><div class="sub-amount" style="color:var(--c-hashtalm-d)">₪1,212</div><div class="sub-change neu">19.3.2025</div></div>
+        </div>
+        <div class="sub-row">
+          <div><div class="sub-name">הפניקס — פנסיה מקיפה</div><div class="sub-meta">חשבון 8493702 — לא פעילה</div></div>
+          <div style="text-align:left;"><div class="sub-amount" style="color:var(--c-hashtalm-d)">₪19,280</div><div class="sub-change neu">מהאקסל</div></div>
+        </div>
+        <div style="padding:10px 18px;font-size:0.78rem;color:var(--faint);">עדכן יתרות ידנית דרך "עדכן שווי"</div>
       </div>`;
   }
 
